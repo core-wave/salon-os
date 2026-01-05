@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+:root {
+  --accent: oklch(0.5008 0.1697 0.25);
+  --radius: 0.25rem;
+  --field-radius: calc(var(--radius) * 3);
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl font-semibold;
+  }
+}
