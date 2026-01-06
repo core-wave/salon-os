@@ -3,7 +3,7 @@
 import { buttonVariants, cn, Label, Separator } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 type SidebarItem = {
   title: string;
@@ -34,16 +34,6 @@ const sidebarCategories: SidebarCategory[] = [
         slug: "appointments",
         icon: "hugeicons:calendar-02",
       },
-      // {
-      //   title: "Employee Schedule",
-      //   slug: "employee-schedule",
-      //   icon: "hugeicons:calendar-add-01",
-      // },
-      {
-        title: "Messages",
-        slug: "messages",
-        icon: "hugeicons:message-01",
-      },
     ],
   },
   {
@@ -54,11 +44,6 @@ const sidebarCategories: SidebarCategory[] = [
         slug: "customers",
         icon: "hugeicons:user-group",
       },
-      // {
-      //   title: "Employees",
-      //   slug: "employees",
-      //   icon: "hugeicons:user-account",
-      // },
     ],
   },
   {
@@ -89,7 +74,7 @@ export default function Sidebar({ organization }: { organization: string }) {
   const selectedPath = pathname.split("/")[3];
 
   return (
-    <div className="bg-surface w-72 p-4 py-6 flex flex-col gap-6 border-r border-separator">
+    <aside className="bg-surface w-72  p-4 py-6 flex flex-col gap-6 border-r border-separator">
       <p className="text-center text-xl">
         salon<b>OS</b>
       </p>
@@ -119,6 +104,6 @@ export default function Sidebar({ organization }: { organization: string }) {
           ))}
         </div>
       ))}
-    </div>
+    </aside>
   );
 }

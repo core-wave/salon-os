@@ -9,7 +9,7 @@ export default function Home() {
       </Link>
       <Link
         className={buttonVariants({ variant: "primary" })}
-        href="/dashboard"
+        href="/dashboard/my-salon"
       >
         Dashboard Page
       </Link>
