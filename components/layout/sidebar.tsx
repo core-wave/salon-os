@@ -89,7 +89,7 @@ export default function Sidebar() {
   const selectedPath = pathname.split("/")[2];
 
   return (
-    <div className="bg-surface w-72 p-4 flex flex-col gap-6 border-r border-separator">
+    <div className="bg-surface w-72 p-4 py-6 flex flex-col gap-6 border-r border-separator">
       <p className="text-center text-xl">
         salon<b>OS</b>
       </p>
