@@ -27,6 +27,8 @@ export const locations = pgTable(
 
     name: varchar("name", { length: 255 }).notNull(), // e.g. "Main salon"
 
+    slug: text("slug").notNull().unique(),
+
     street: varchar("street", { length: 255 }).notNull(),
     postalCode: varchar("postal_code", { length: 32 }).notNull(),
     city: varchar("city", { length: 255 }).notNull(),
