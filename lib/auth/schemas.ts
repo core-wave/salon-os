@@ -19,3 +19,11 @@ export const signupSchema = z
   });
 
 export type SignupProps = z.infer<typeof signupSchema>;
+
+export const loginSchema = z.object({
+  email: z.email("Please enter a valid email address"),
+
+  password: z.string("Please enter a valid password"),
+});
+
+export type LoginProps = z.infer<typeof loginSchema>;
