@@ -19,6 +19,12 @@ export default function Home() {
       >
         Signup Page
       </Link>
+      <Link
+        className={buttonVariants({ variant: "primary" })}
+        href="/auth/login"
+      >
+        Login Page
+      </Link>
     </div>
   );
 }

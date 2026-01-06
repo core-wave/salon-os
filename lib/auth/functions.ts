@@ -3,8 +3,9 @@
 import z from "zod";
 import { FormState } from "../types";
 import { auth } from ".";
-import { SignupProps, signupSchema } from "./schemas";
+import { LoginProps, loginSchema, SignupProps, signupSchema } from "./schemas";
 import { APIError } from "better-auth";
+import { redirect } from "next/navigation";
 
 export async function signup(
   prevState: FormState<SignupProps>,
@@ -64,4 +65,50 @@ export async function signup(
   console.log("success");
 
   return { status: "success", fieldValues: parsed.data };
+}
+
+export async function login(
+  prevState: FormState<LoginProps>,
+  formData: FormData
+): Promise<FormState<LoginProps>> {
+  const rawData: LoginProps = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
+  const parsed = loginSchema.safeParse(rawData);
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      fieldErrors: z.treeifyError(parsed.error).properties,
+      fieldValues: rawData,
+    };
+  }
+
+  try {
+    const res = await auth.api.signInEmail({
+      body: {
+        email: parsed.data.email,
+        password: parsed.data.password,
+      },
+    });
+  } catch (error) {
+    if (error instanceof APIError) {
+      const message = String(error.message);
+
+      return {
+        status: "error",
+        fieldValues: parsed.data,
+        formErrors: [message],
+      };
+    }
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+      formErrors: ["An unknown error occurred"],
+    };
+  }
+
+  redirect("/dashboard");
 }
