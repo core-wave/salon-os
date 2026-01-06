@@ -3,7 +3,7 @@
 import { buttonVariants, cn, Label, Separator } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 type SidebarItem = {
   title: string;
@@ -83,10 +83,10 @@ const sidebarCategories: SidebarCategory[] = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ organization }: { organization: string }) {
   const pathname = usePathname();
 
-  const selectedPath = pathname.split("/")[2];
+  const selectedPath = pathname.split("/")[3];
 
   return (
     <div className="bg-surface w-72 p-4 py-6 flex flex-col gap-6 border-r border-separator">
@@ -103,7 +103,7 @@ export default function Sidebar() {
           )}
           {cat.items.map((item) => (
             <Link
-              href={`/dashboard/${item.slug}`}
+              href={`/dashboard/${organization}/${item.slug}`}
               key={item.slug}
               className={cn(
                 buttonVariants({
