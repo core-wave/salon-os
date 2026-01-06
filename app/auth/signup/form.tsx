@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordField from "@/components/forms/password-field";
 import { signup } from "@/lib/auth/functions";
 import {
   Button,
@@ -52,30 +53,28 @@ export function SignupForm() {
             <ErrorMessage>{state.fieldErrors.email.errors[0]}</ErrorMessage>
           )}
         </TextField>
-        <TextField
+        <PasswordField
           defaultValue={state.fieldValues?.password}
           name="password"
-          type="text"
-        >
-          <Label>Password</Label>
-          <Input placeholder="Enter your password" />
-          {state.status === "error" && state.fieldErrors?.password && (
-            <ErrorMessage>{state.fieldErrors.password.errors[0]}</ErrorMessage>
-          )}
-        </TextField>
-        <TextField
+          label="Password"
+          errorMessage={
+            state.status === "error" && state.fieldErrors?.password
+              ? state.fieldErrors.password.errors[0]
+              : undefined
+          }
+          placeholder="Enter your password"
+        />
+        <PasswordField
           defaultValue={state.fieldValues?.confirmPassword}
           name="confirmPassword"
-          type="text"
-        >
-          <Label>Confirm Password</Label>
-          <Input placeholder="Repeat your password" />
-          {state.status === "error" && state.fieldErrors?.confirmPassword && (
-            <ErrorMessage>
-              {state.fieldErrors.confirmPassword.errors[0]}
-            </ErrorMessage>
-          )}
-        </TextField>
+          label="Confirm Password"
+          errorMessage={
+            state.status === "error" && state.fieldErrors?.confirmPassword
+              ? state.fieldErrors.confirmPassword.errors[0]
+              : undefined
+          }
+          placeholder="Confirm your password"
+        />
         {state.status === "error" && state.formErrors && (
           <ErrorMessage>{state.formErrors[0]}</ErrorMessage>
         )}
