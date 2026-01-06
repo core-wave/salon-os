@@ -4,7 +4,6 @@ import { organization } from "better-auth/plugins";
 import { db } from "@/lib/db/index";
 import * as schema from "@/lib/db/schema";
 import { sendVerificationEmail } from "../email/functions";
-import { redirect } from "next/navigation";
 import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
