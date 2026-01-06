@@ -2,7 +2,7 @@
 @import "@heroui/styles";
 
 :root {
-  --accent: oklch(0.5008 0.1697 0.25);
+  --accent: oklch(0.5461 0.2152 262.88);
   --radius: 0.25rem;
   --field-radius: calc(var(--radius) * 3);
 }

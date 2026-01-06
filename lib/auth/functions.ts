@@ -4,7 +4,6 @@ import z from "zod";
 import { FormState } from "../types";
 import { auth } from ".";
 import { SignupProps, signupSchema } from "./schemas";
-import { redirect } from "next/navigation";
 import { APIError } from "better-auth";
 
 export async function signup(
@@ -18,11 +17,14 @@ export async function signup(
     name: formData.get("name") as string,
   };
 
+  console.log("rawData:", rawData);
+
   const parsed = signupSchema.safeParse(rawData);
+
+  console.log("parsed:", parsed);
 
   if (!parsed.success) {
     console.log("parsing error");
-    console.log(parsed);
     return {
       status: "error",
       fieldErrors: z.treeifyError(parsed.error).properties,
@@ -35,13 +37,15 @@ export async function signup(
       body: {
         email: parsed.data.email,
         password: parsed.data.password,
-        name: "amogus",
+        name: parsed.data.name,
       },
     });
-  } catch (error) {
-    console.log(error);
 
-    if (typeof error === "object" && error != undefined && "message" in error) {
+    console.log("res:", res);
+  } catch (error) {
+    console.log("error:", error);
+
+    if (error instanceof APIError) {
       const message = String(error.message);
 
       return {
@@ -57,5 +61,7 @@ export async function signup(
     };
   }
 
-  redirect("/dashboard");
+  console.log("success");
+
+  return { status: "success", fieldValues: parsed.data };
 }
