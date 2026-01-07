@@ -90,6 +90,7 @@ export default function Sidebar({ organization }: { organization: string }) {
 
             return (
               <Link
+                prefetch
                 href={
                   item.slug === "overview"
                     ? `/dashboard/${organization}`

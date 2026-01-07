@@ -32,7 +32,11 @@ export async function createOrganization(
   let organizationSlug = "";
 
   try {
-    const res = await SalonCore.createOrganization(parsed.data.slug, parsed.data.name, parsed.data.userId);
+    const res = await SalonCore.createOrganization(
+      parsed.data.slug,
+      parsed.data.name,
+      parsed.data.userId
+    );
 
     if (res) {
       organizationSlug = res.slug;
