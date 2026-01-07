@@ -1,13 +1,22 @@
 import AppointmentCard from "@/components/appointment-card";
+import AppointmentRow from "@/components/appointment-row";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
-import { mockAppointments } from "@/lib/mockdata/appointments";
-import { Button, Card, Chip, Separator } from "@heroui/react";
+import { salonCore } from "@/lib/core";
+import { Button, Card } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
-export default function OverviewPage() {
-  const nextAppointment = mockAppointments.find(
-    (apt) => apt.status === "Planned"
-  );
+export default async function OverviewPage({
+  params,
+}: {
+  params: Promise<{ locationSlug: string }>;
+}) {
+  const { locationSlug } = await params;
+
+  const location = await salonCore.getLocationBySlug(locationSlug);
+  const appointments = await location.listAppointments();
+
+  const nextAppointment = appointments.find((apt) => apt.status === "Planned");
+
   return (
     <>
       <DashboardPageHeader
@@ -33,12 +42,9 @@ export default function OverviewPage() {
             <Card.Title>Next Appointment</Card.Title>
             <Card.Description>Coming up soon</Card.Description>
           </Card.Header>
-          <Separator />
-          <AppointmentCard
-            appointment={nextAppointment}
-            variant="secondary"
-            hideDate
-          />
+          <Card.Content className="grid grid-cols-[auto_auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+            <AppointmentRow {...nextAppointment} />
+          </Card.Content>
         </Card>
       )}
 
@@ -90,13 +96,9 @@ export default function OverviewPage() {
             All scheduled appointments for today
           </Card.Description>
         </Card.Header>
-        <Card.Content className="gap-2">
-          {mockAppointments.map((appointment, idx) => (
-            <AppointmentCard
-              key={idx}
-              appointment={appointment}
-              variant="secondary"
-            />
+        <Card.Content className="grid grid-cols-[auto_auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+          {appointments.map((appointment, idx) => (
+            <AppointmentRow key={idx} {...appointment} />
           ))}
         </Card.Content>
       </Card>

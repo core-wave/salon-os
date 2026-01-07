@@ -14,16 +14,7 @@ import { Icon } from "@iconify/react";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { CAppointment } from "@/lib/core/types/appointment";
 import { salonCore } from "@/lib/core";
-
-const statusColorMap: Record<
-  CAppointment["status"],
-  "success" | "warning" | "danger" | "default"
-> = {
-  Planned: "warning",
-  Completed: "success",
-  Cancelled: "danger",
-  "No Show": "default",
-};
+import AppointmentRow from "@/components/appointment-row";
 
 export default async function AppointmentsPage({
   params,
@@ -99,39 +90,7 @@ export default async function AppointmentsPage({
           <Label className="font-semibold">Appointment Type</Label>
           <Label className="font-semibold">Status</Label>
           {appointments.map((appt, idx) => (
-            <Fragment key={idx}>
-              <Separator className="col-span-5" />
-
-              <div className="flex items-center gap-3">
-                <Avatar>
-                  <Avatar.Image
-                    alt={appt.customer.fullName}
-                    src={`https://tapback.co/api/avatar/${appt.customer.fullName}.webp`}
-                  />
-                  <Avatar.Fallback>JD</Avatar.Fallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <Label>{appt.customer.fullName}</Label>
-                  <Label className="font-normal text-sm text-muted">
-                    {appt.customer.email}
-                  </Label>
-                </div>
-              </div>
-
-              <Label className="font-normal">{appt.date}</Label>
-
-              <Label className="font-normal">{appt.time}</Label>
-
-              <Label className="font-normal">{appt.appointmentType}</Label>
-
-              <Chip
-                className="justify-self-start w-fit"
-                color={statusColorMap[appt.status]}
-                variant="soft"
-              >
-                {appt.status}
-              </Chip>
-            </Fragment>
+            <AppointmentRow {...appt} key={idx} />
           ))}
         </div>
       </Card>
