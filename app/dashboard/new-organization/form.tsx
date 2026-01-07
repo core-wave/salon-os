@@ -81,7 +81,7 @@ export default function CreateOrganizationForm() {
           {isLoading ? (
             <Spinner size="sm" color="current" />
           ) : (
-            <Icon icon={"hugeicons:store-add-01"} />
+            <Icon icon={"tabler:building-store"} />
           )}
         </Button>
       </div>
