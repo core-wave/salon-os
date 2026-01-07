@@ -104,6 +104,7 @@ export default function Sidebar({ organization }: { organization: string }) {
                     fullWidth: true,
                   }),
                   "justify-start",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
                   isActive && "pointer-events-none"
                 )}
               >
