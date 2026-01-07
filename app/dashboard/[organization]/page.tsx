@@ -15,11 +15,11 @@ export default function OverviewPage() {
         description="Welcome back! Here's what's happening today"
       >
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button size="sm" variant="tertiary" fullWidth>
+          <Button variant="tertiary" fullWidth>
             <Icon icon={`tabler:plus`} />
             New Customer
           </Button>
-          <Button size="sm" fullWidth>
+          <Button fullWidth>
             <Icon icon={`tabler:plus`} />
             New Appointment
           </Button>

@@ -1,4 +1,17 @@
-import { Avatar, Button, Card, Chip, Label, Separator } from "@heroui/react";
+import {
+  Avatar,
+  Button,
+  ButtonGroup,
+  Card,
+  Chip,
+  Description,
+  Dropdown,
+  Header,
+  Label,
+  ListBox,
+  Select,
+  Separator,
+} from "@heroui/react";
 import { Fragment } from "react/jsx-runtime";
 import { Icon } from "@iconify/react";
 import { Appointment, mockAppointments } from "@/lib/mockdata/appointments";
@@ -21,11 +34,55 @@ export default async function AppointmentsPage() {
         title="Appointments"
         description="Manage and schedule appointments"
       >
-        <Button size="sm">
+        <Button>
           <Icon icon={`tabler:plus`} />
           New Appointment
         </Button>
       </DashboardPageHeader>
+
+      <div className="flex gap-4 items-center">
+        <ButtonGroup variant="secondary">
+          <Button isIconOnly>
+            <Icon icon={`tabler:chevron-left`} />
+          </Button>
+          <Button>Today</Button>
+          <Button isIconOnly>
+            <Icon icon={`tabler:chevron-right`} />
+          </Button>
+        </ButtonGroup>
+
+        <Label className="flex-1">
+          {new Intl.DateTimeFormat("en-GB", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }).format(new Date())}
+        </Label>
+
+        <Select className="w-[128px]" defaultValue={"day"}>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              <ListBox.Item id="day" textValue="day">
+                Day View
+                <ListBox.ItemIndicator />
+              </ListBox.Item>
+              <ListBox.Item id="week" textValue="week">
+                Week View
+                <ListBox.ItemIndicator />
+              </ListBox.Item>
+              <ListBox.Item id="list" textValue="list">
+                List View
+                <ListBox.ItemIndicator />
+              </ListBox.Item>
+            </ListBox>
+          </Select.Popover>
+        </Select>
+      </div>
 
       <Card className="gap-6">
         <div className="grid grid-cols-[auto_auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">

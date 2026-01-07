@@ -9,7 +9,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Manage your preferences and configuration"
       >
-        {/* <Button size="sm">
+        {/* <Button>
           <Icon icon={`tabler:plus`} />
           New Appointment
         </Button> */}

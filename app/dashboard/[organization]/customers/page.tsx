@@ -9,7 +9,7 @@ export default function CustomersPage() {
         title="Customers"
         description="Manage your customer base"
       >
-        {/* <Button size="sm">
+        {/* <Button>
           <Icon icon={`tabler:plus`} />
           New Customer
         </Button> */}

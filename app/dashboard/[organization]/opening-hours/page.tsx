@@ -9,7 +9,7 @@ export default function OpeningHoursPage() {
         title="Opening Hours"
         description="Manage your availability"
       >
-        <Button size="sm">
+        <Button>
           <Icon icon={`tabler:plus`} />
           New Appointment
         </Button>

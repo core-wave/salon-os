@@ -11,7 +11,7 @@ export default function AppointmentTypesPage() {
         title="Appointment Types"
         description="Manage your services and pricing"
       >
-        <Button size="sm">
+        <Button>
           <Icon icon={`tabler:plus`} />
           New Appointment Type
         </Button>
