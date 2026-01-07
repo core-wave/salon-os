@@ -7,11 +7,11 @@ import { Fragment } from "react/jsx-runtime";
 export default async function AppointmentTypesPage({
   params,
 }: {
-  params: Promise<{ organizationSlug: string }>;
+  params: Promise<{ locationSlug: string }>;
 }) {
-  const { organizationSlug } = await params;
+  const { locationSlug } = await params;
 
-  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+  const org = await salonCore.getOrganizationBySlug(locationSlug);
   const appointmentTypes = await org.listAppointmentTypes();
 
   console.log(appointmentTypes);

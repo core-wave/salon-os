@@ -7,13 +7,13 @@ export default async function DashboardLayout({
   params,
 }: {
   children: ReactNode;
-  params: Promise<{ organizationSlug: string }>;
+  params: Promise<{ locationSlug: string }>;
 }) {
-  const { organizationSlug } = await params;
+  const { locationSlug } = await params;
 
   return (
     <div className="max-h-dvh flex w-full overflow-hidden">
-      <Sidebar organization={organizationSlug} />
+      <Sidebar organization={locationSlug} />
       <ScrollShadow
         hideScrollBar
         className="w-full overflow-x-hidden overflow-y-auto p-4 sm:p-6"
