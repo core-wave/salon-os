@@ -4,9 +4,6 @@ import {
   ButtonGroup,
   Card,
   Chip,
-  Description,
-  Dropdown,
-  Header,
   Label,
   ListBox,
   Select,
@@ -14,11 +11,12 @@ import {
 } from "@heroui/react";
 import { Fragment } from "react/jsx-runtime";
 import { Icon } from "@iconify/react";
-import { Appointment, mockAppointments } from "@/lib/mockdata/appointments";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
+import { CAppointment } from "@/lib/core/types/appointment";
+import { salonCore } from "@/lib/core";
 
 const statusColorMap: Record<
-  Appointment["status"],
+  CAppointment["status"],
   "success" | "warning" | "danger" | "default"
 > = {
   Planned: "warning",
@@ -27,7 +25,16 @@ const statusColorMap: Record<
   "No Show": "default",
 };
 
-export default async function AppointmentsPage() {
+export default async function AppointmentsPage({
+  params,
+}: {
+  params: Promise<{ organizationSlug: string }>;
+}) {
+  const { organizationSlug } = await params;
+
+  const location = await salonCore.getLocationBySlug(organizationSlug); // this is fake
+  const appointments = await location.listAppointments();
+
   return (
     <>
       <DashboardPageHeader
@@ -91,7 +98,7 @@ export default async function AppointmentsPage() {
           <Label className="font-semibold">Time</Label>
           <Label className="font-semibold">Appointment Type</Label>
           <Label className="font-semibold">Status</Label>
-          {mockAppointments.map((appt, idx) => (
+          {appointments.map((appt, idx) => (
             <Fragment key={idx}>
               <Separator className="col-span-5" />
 

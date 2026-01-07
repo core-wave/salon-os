@@ -5,7 +5,7 @@ import { FormState } from "../types";
 import { CreateOrganizationProps, createOrganizationSchema } from "./schemas";
 import { APIError } from "better-auth";
 import { redirect } from "next/navigation";
-import { SalonCore } from "../core";
+import { salonCore } from "../core";
 
 export async function createOrganization(
   prevState: FormState<CreateOrganizationProps>,
@@ -32,7 +32,7 @@ export async function createOrganization(
   let organizationSlug = "";
 
   try {
-    const res = await SalonCore.createOrganization(
+    const res = await salonCore.createOrganization(
       parsed.data.slug,
       parsed.data.name,
       parsed.data.userId
