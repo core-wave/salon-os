@@ -1,17 +1,43 @@
+import { auth } from "../auth";
+import { db } from "../db";
+import { organization } from "../db/auth";
 import { CAppointment } from "./types/appointment";
 import { CAppointmentType } from "./types/appointment_type";
+import { v7 as uuidv7 } from 'uuid';
 
 class Core {
+    public async createOrganization(slug: string, name: string, userId: string) {
+        const res = await auth.api.createOrganization({
+            body: { name, slug, userId }
+        });
+
+        return res ? { slug: res.slug } : res;
+    }
+
     public async GetLocationBySlug(slug: string): Promise<CLocation> {
         return new CLocation();
     }
 
-    public async GetOrganizationBySlug(slug: string): Promise<COrganization> {
-        return new COrganization();
+    public async GetOrganizationBySlug(id: string): Promise<COrganization> {
+        return new COrganization(id, "Placeholder");
+    }
+
+    public async GetAllAvailableOrganizations(): Promise<COrganization[]> {
+        const result = await db.select().from(organization).execute();
+        return result.map(x => new COrganization(x.id, x.name));
     }
 }
 
 class COrganization {
+
+    readonly id: string;
+    readonly name: string;
+
+    constructor(id: string, name: string) {
+        this.id = id;
+        this.name = name;
+    }
+
     public async GetAppointments(): Promise<CAppointment[]> {
         return [
             {

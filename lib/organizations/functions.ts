@@ -1,11 +1,11 @@
 "use server";
 
 import z from "zod";
-import { auth } from "../auth";
 import { FormState } from "../types";
 import { CreateOrganizationProps, createOrganizationSchema } from "./schemas";
 import { APIError } from "better-auth";
 import { redirect } from "next/navigation";
+import { SalonCore } from "../core";
 
 export async function createOrganization(
   prevState: FormState<CreateOrganizationProps>,
@@ -32,13 +32,7 @@ export async function createOrganization(
   let organizationSlug = "";
 
   try {
-    const res = await auth.api.createOrganization({
-      body: {
-        name: parsed.data.name,
-        slug: parsed.data.slug,
-        userId: parsed.data.userId,
-      },
-    });
+    const res = await SalonCore.createOrganization(parsed.data.slug, parsed.data.name, parsed.data.userId);
 
     if (res) {
       organizationSlug = res.slug;

@@ -43,6 +43,13 @@
       "when": 1767699092402,
       "tag": "0005_misty_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767798204391,
+      "tag": "0006_quick_misty_knight",
+      "breakpoints": true
     }
   ]
 }
