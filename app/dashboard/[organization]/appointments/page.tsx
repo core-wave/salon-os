@@ -60,7 +60,7 @@ export default async function AppointmentsPage() {
           }).format(new Date())}
         </Label>
 
-        <Select className="w-[128px]" defaultValue={"day"}>
+        <Select className="w-32" defaultValue={"day"}>
           <Select.Trigger>
             <Select.Value />
             <Select.Indicator />
