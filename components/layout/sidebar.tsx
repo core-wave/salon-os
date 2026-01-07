@@ -22,7 +22,7 @@ const sidebarCategories: SidebarCategory[] = [
       {
         title: "Overview",
         slug: "overview",
-        icon: "hugeicons:dashboard-square-02",
+        icon: "tabler:layout-dashboard",
       },
     ],
   },
@@ -32,7 +32,7 @@ const sidebarCategories: SidebarCategory[] = [
       {
         title: "Appointments",
         slug: "appointments",
-        icon: "hugeicons:calendar-02",
+        icon: "tabler:calendar",
       },
     ],
   },
@@ -42,7 +42,7 @@ const sidebarCategories: SidebarCategory[] = [
       {
         title: "Customers",
         slug: "customers",
-        icon: "hugeicons:user-group",
+        icon: "tabler:user",
       },
     ],
   },
@@ -52,17 +52,17 @@ const sidebarCategories: SidebarCategory[] = [
       {
         title: "Appointment Types",
         slug: "appointment-types",
-        icon: "hugeicons:calendar-setting-01",
+        icon: "tabler:template",
       },
       {
         title: "Opening Hours",
         slug: "opening-hours",
-        icon: "hugeicons:clock-02",
+        icon: "tabler:clock",
       },
       {
         title: "Settings",
         slug: "settings",
-        icon: "hugeicons:settings-01",
+        icon: "tabler:settings",
       },
     ],
   },
@@ -70,38 +70,48 @@ const sidebarCategories: SidebarCategory[] = [
 
 export default function Sidebar({ organization }: { organization: string }) {
   const pathname = usePathname();
-
-  const selectedPath = pathname.split("/")[3];
+  const selectedPath = pathname.split("/")[3] || "overview";
 
   return (
-    <aside className="bg-surface w-72  p-4 py-6 flex flex-col gap-6 border-r border-separator">
+    <aside className="bg-surface w-72  p-4 py-6 flex-col gap-6 border-r border-separator hidden md:flex">
       <p className="text-center text-xl">
         salon<b>OS</b>
       </p>
       {sidebarCategories.map((cat, idx) => (
         <div key={idx} className="flex flex-col">
-          {idx != 0 && <Separator className="mb-6" />}
+          {idx != 0 && <Separator className="mb-6" isOnSurface />}
           {cat.title && (
             <Label className="text-xs text-muted mb-2 ml-2">
               {cat.title.toUpperCase()}
             </Label>
           )}
-          {cat.items.map((item) => (
-            <Link
-              href={`/dashboard/${organization}/${item.slug}`}
-              key={item.slug}
-              className={cn(
-                buttonVariants({
-                  variant: selectedPath === item.slug ? "primary" : "ghost",
-                  fullWidth: true,
-                }),
-                "justify-start"
-              )}
-            >
-              <Icon icon={item.icon} />
-              {item.title}
-            </Link>
-          ))}
+          {cat.items.map((item) => {
+            const isActive = selectedPath === item.slug;
+
+            return (
+              <Link
+                href={
+                  item.slug === "overview"
+                    ? `/dashboard/${organization}`
+                    : `/dashboard/${organization}/${item.slug}`
+                }
+                key={item.slug}
+                aria-current={isActive ? "page" : undefined}
+                tabIndex={isActive ? -1 : 0}
+                className={cn(
+                  buttonVariants({
+                    variant: isActive ? "primary" : "ghost",
+                    fullWidth: true,
+                  }),
+                  "justify-start",
+                  isActive && "pointer-events-none"
+                )}
+              >
+                <Icon icon={isActive ? `${item.icon}-filled` : item.icon} />
+                {item.title}
+              </Link>
+            );
+          })}
         </div>
       ))}
     </aside>

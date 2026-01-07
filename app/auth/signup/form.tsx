@@ -23,7 +23,7 @@ export function SignupForm() {
   if (state.status === "success") {
     return (
       <div className="w-full max-w-sm flex flex-col gap-2 items-center">
-        <Icon icon={`hugeicons:mail-validation-02`} className="size-12" />
+        <Icon icon={`tabler:mail-check`} className="size-12" />
         <h1>Check your email</h1>
         <Description>
           We sent you a link to verify your email address
@@ -95,7 +95,7 @@ export function SignupForm() {
           {isLoading ? (
             <Spinner size="sm" color="current" />
           ) : (
-            <Icon icon={`hugeicons:logout-01`} />
+            <Icon icon={`tabler:logout-01`} />
           )}
         </Button>
       </form>

@@ -60,7 +60,7 @@ export function LoginForm() {
         {isLoading ? (
           <Spinner size="sm" color="current" />
         ) : (
-          <Icon icon={`hugeicons:login-01`} />
+          <Icon icon={`tabler:login-01`} />
         )}
       </Button>
     </form>

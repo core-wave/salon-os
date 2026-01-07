@@ -2,13 +2,7 @@
 @import "@heroui/styles";
 
 :root {
-  --accent: oklch(0.5461 0.2152 262.88);
+  --accent: oklch(0.35 0.05 235);
   --radius: 0.25rem;
   --field-radius: calc(var(--radius) * 3);
-}
-
-@layer base {
-  h1 {
-    @apply text-2xl font-semibold;
-  }
 }

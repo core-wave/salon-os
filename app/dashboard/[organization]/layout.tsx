@@ -12,12 +12,15 @@ export default async function DashboardLayout({
   const { organization } = await params;
 
   return (
-    <div className="max-h-dvh flex w-full">
+    <div className="max-h-dvh flex w-full overflow-hidden">
       <Sidebar organization={organization} />
-      <ScrollShadow hideScrollBar className="w-full overflow-y-auto p-6">
-        <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
+      <ScrollShadow
+        hideScrollBar
+        className="w-full overflow-x-hidden overflow-y-auto p-4 sm:p-6"
+      >
+        <main className="min-h-full w-full max-w-5xl mx-auto flex flex-col gap-4 sm:gap-6">
           {children}
-        </div>
+        </main>
       </ScrollShadow>
     </div>
   );

@@ -43,11 +43,7 @@ export default function PasswordField({
             variant="ghost"
             onPress={() => setShowPassword(!showPassword)}
           >
-            <Icon
-              icon={
-                showPassword ? "hugeicons:view-off-slash" : "hugeicons:view"
-              }
-            />
+            <Icon icon={showPassword ? "tabler:eye" : "tabler:eye-off"} />
           </Button>
         </InputGroup.Suffix>
       </InputGroup>
