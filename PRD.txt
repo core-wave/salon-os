@@ -1,0 +1,440 @@
+================================================================================
+                              SALONOS - PRODUCT REQUIREMENTS DOCUMENT
+================================================================================
+
+Version: 1.0
+Last Updated: January 2025
+Status: MVP Development
+
+================================================================================
+1. PRODUCT OVERVIEW
+================================================================================
+
+SalonOS is a simple, no-frills appointment scheduling platform for solo
+professionals and small businesses. Built mobile-first with a focus on
+simplicity and ease of use.
+
+VISION
+------
+Make appointment scheduling effortless for independent professionals.
+No complexity, no bloat - just what you need to run your business.
+
+TARGET USERS
+------------
+- Solo professionals running appointment-based businesses:
+  - Hair stylists & barbers
+  - Massage therapists & physiotherapists
+  - Personal trainers & coaches
+  - Consultants & freelancers
+  - Beauticians & nail technicians
+  - Tattoo artists
+  - Any 1-on-1 service provider
+
+CORE VALUE PROPOSITION
+----------------------
+1. Generous free tier - Free forever for solo professionals
+2. Simple interface - No training needed, works out of the box
+3. Mobile-first - Manage your business from your phone
+4. Straightforward - Does what it says, nothing more
+
+================================================================================
+2. BUSINESS MODEL
+================================================================================
+
+PRICING TIERS
+-------------
+┌─────────────────┬────────────────┬─────────────────────────────────────────┐
+│ Tier            │ Price          │ Features                                │
+├─────────────────┼────────────────┼─────────────────────────────────────────┤
+│ Solo (Free)     │ €0/month       │ 1 user, unlimited appointments,         │
+│                 │                │ booking page, email notifications       │
+├─────────────────┼────────────────┼─────────────────────────────────────────┤
+│ Team            │ €10/user/month │ Multiple team members, shared calendar, │
+│                 │                │ staff management                        │
+├─────────────────┼────────────────┼─────────────────────────────────────────┤
+│ Future: Pro     │ TBD            │ Payment processing through platform     │
+└─────────────────┴────────────────┴─────────────────────────────────────────┘
+
+STRATEGY
+--------
+- Capture market share with generous free tier
+- Convert growing businesses to paid Team tier
+- Future monetization through payment processing fees
+
+================================================================================
+3. MVP REQUIREMENTS (v1.0)
+================================================================================
+
+MUST HAVE - Launch Blockers
+---------------------------
+
+[ ] Opening Hours Configuration
+    - Set regular weekly hours (Mon-Sun)
+    - Mark days as closed
+    - Set exceptions (holidays, vacations)
+    - Simple UI - toggle days on/off, set open/close times
+
+[ ] Appointment Types
+    - Create service types (name, duration, price)
+    - Enable/disable services
+    - Optional description
+    - Display on booking page
+
+[ ] Public Booking Page
+    - Shareable URL: booking.salonos.io/{slug} or {slug}.salonos.io
+    - Mobile-optimized interface
+    - View available services
+    - Select date/time from available slots
+    - Enter contact details (name, email, phone)
+    - Confirm booking via email
+
+[ ] Email Notifications
+    - Owner: New booking notification
+    - Owner: Booking cancellation notification
+    - Customer: Booking confirmation
+    - Customer: Booking reminder (24h before)
+
+[ ] Owner Dashboard (Mobile-First)
+    - View upcoming appointments
+    - View appointment details
+    - Cancel/reschedule appointments
+    - Quick daily/weekly overview
+
+[ ] Authentication & Onboarding
+    - Email/password signup
+    - Email verification
+    - Create business profile (name, slug)
+    - Invite-only access (waitlist/invite codes)
+
+[ ] Localization
+    - English (default)
+    - Dutch
+    - Euro currency
+
+NICE TO HAVE - Post-MVP
+-----------------------
+
+[ ] Customer Management
+    - Customer list with history
+    - Notes per customer
+    - Contact information
+
+[ ] Calendar Integration
+    - Google Calendar sync
+    - Apple Calendar sync
+    - Two-way sync (block time, show appointments)
+
+[ ] Advanced Scheduling
+    - Buffer time between appointments
+    - Break times
+    - Recurring appointments
+
+[ ] Team Features (Paid Tier)
+    - Multiple staff members
+    - Per-staff availability
+    - Staff assignment to services
+
+[ ] Analytics
+    - Booking statistics
+    - Popular time slots
+    - No-show rates
+
+NOT PLANNED
+-----------
+- Payment processing (future consideration)
+- POS integration (never)
+- Complex multi-location management
+- Inventory management
+- Marketing/CRM features
+
+================================================================================
+4. USER JOURNEYS
+================================================================================
+
+JOURNEY 1: Owner Onboarding
+---------------------------
+1. Receive invite code / join from waitlist
+2. Sign up with email/password
+3. Verify email
+4. Create business profile
+   - Business name
+   - URL slug
+5. Set opening hours
+   - Quick setup: "Typical week" template
+   - Toggle days, set hours
+6. Add first appointment type
+   - Name, duration, price
+7. Share booking link
+8. Done - ready to receive bookings
+
+JOURNEY 2: Customer Booking
+---------------------------
+1. Visit booking link (shared by owner)
+2. See business name and available services
+3. Select a service
+4. View available dates (calendar)
+5. Select a date
+6. View available time slots
+7. Select a time
+8. Enter contact details
+   - Name
+   - Email
+   - Phone (optional)
+   - Notes (optional)
+9. Submit booking
+10. Receive confirmation email
+11. Receive reminder 24h before
+
+JOURNEY 3: Owner Daily Flow
+---------------------------
+1. Open app on phone
+2. See today's appointments at a glance
+3. Tap appointment for details
+4. Complete appointment (no action needed)
+5. Receive notification for new booking
+6. View booking details
+7. Appointment auto-added to schedule
+
+================================================================================
+5. TECHNICAL REQUIREMENTS
+================================================================================
+
+PLATFORM
+--------
+- Mobile-first web application
+- Progressive Web App (PWA) for app-like experience
+- Responsive design (mobile primary, desktop secondary)
+
+TECH STACK (Current)
+--------------------
+- Frontend: Next.js 16, React 19, TypeScript
+- UI: HeroUI components, TailwindCSS
+- Backend: Next.js API routes, Server Actions
+- Database: PostgreSQL with Drizzle ORM
+- Auth: BetterAuth with email/password
+- Email: Resend for transactional emails
+
+INFRASTRUCTURE
+--------------
+- Hosting: Vercel (recommended)
+- Database: Supabase PostgreSQL
+- Email: Resend
+- Domain: salonos.io (assumed)
+
+LOCALIZATION APPROACH
+---------------------
+- i18n framework: next-intl or similar
+- Languages: en (default), nl
+- Currency: EUR (hardcoded for MVP)
+- Date formats: Localized per language
+
+================================================================================
+6. DATABASE SCHEMA (Current State)
+================================================================================
+
+EXISTING TABLES
+---------------
+- users              Auth users
+- sessions           Active sessions
+- organizations      Business accounts
+- members            Org membership
+- locations          Business locations
+- opening_hours      Weekly schedule
+- opening_hour_exceptions  Special dates
+- appointment_types  Services offered
+- customers          Client records
+- appointments       Bookings
+
+SCHEMA CHANGES NEEDED FOR MVP
+-----------------------------
+- appointments: Add status workflow (pending, confirmed, completed, cancelled)
+- appointments: Add customer contact fields for guest bookings
+- Add: email_notifications table for tracking sent emails
+- Add: invite_codes table for waitlist/invite system
+
+================================================================================
+7. API / FEATURES BREAKDOWN
+================================================================================
+
+OPENING HOURS
+-------------
+GET    /api/organizations/{slug}/opening-hours
+PUT    /api/organizations/{slug}/opening-hours
+POST   /api/organizations/{slug}/opening-hours/exceptions
+DELETE /api/organizations/{slug}/opening-hours/exceptions/{id}
+
+APPOINTMENT TYPES
+-----------------
+GET    /api/organizations/{slug}/appointment-types
+POST   /api/organizations/{slug}/appointment-types
+PUT    /api/organizations/{slug}/appointment-types/{id}
+DELETE /api/organizations/{slug}/appointment-types/{id}
+
+BOOKING (Public)
+----------------
+GET    /api/booking/{slug}                    Business info + services
+GET    /api/booking/{slug}/availability       Available slots for date range
+POST   /api/booking/{slug}/book               Create booking
+
+APPOINTMENTS (Owner)
+--------------------
+GET    /api/organizations/{slug}/appointments          List appointments
+GET    /api/organizations/{slug}/appointments/{id}     Get details
+PUT    /api/organizations/{slug}/appointments/{id}     Update/cancel
+DELETE /api/organizations/{slug}/appointments/{id}     Delete
+
+NOTIFICATIONS
+-------------
+- Triggered automatically on booking events
+- No direct API - handled by background jobs/webhooks
+
+================================================================================
+8. UI/UX PRINCIPLES
+================================================================================
+
+DESIGN PHILOSOPHY
+-----------------
+- Simple over feature-rich
+- Fast over fancy
+- Clear over clever
+- Mobile over desktop
+
+VISUAL STYLE
+------------
+- Clean, minimal interface
+- Generous whitespace
+- Clear typography
+- Subtle colors, not overwhelming
+- No dark patterns or manipulative UI
+
+INTERACTION PATTERNS
+--------------------
+- One primary action per screen
+- Clear feedback on all actions
+- Forgiving - easy to undo/change
+- Progressive disclosure - show more only when needed
+
+MOBILE CONSIDERATIONS
+---------------------
+- Thumb-friendly tap targets (min 44px)
+- Bottom navigation for primary actions
+- Swipe gestures where natural
+- Offline-capable for viewing schedule
+
+================================================================================
+9. LAUNCH STRATEGY
+================================================================================
+
+PHASE 1: Closed Beta (Invite Only)
+----------------------------------
+- Hand-picked early users (10-20)
+- Direct feedback channel
+- Rapid iteration
+- No public marketing
+
+PHASE 2: Private Beta (Waitlist)
+--------------------------------
+- Waitlist signup on landing page
+- Gradual invite rollout
+- Monitor system stability
+- Gather testimonials
+
+PHASE 3: Public Launch
+----------------------
+- Remove invite requirement
+- Public marketing
+- Free tier available to all
+
+================================================================================
+10. SUCCESS METRICS
+================================================================================
+
+MVP SUCCESS CRITERIA
+--------------------
+- 100 active businesses in first 3 months
+- 1000 bookings processed
+- <5% support ticket rate
+- >80% 7-day retention
+
+KEY METRICS TO TRACK
+--------------------
+- Signups (daily/weekly/monthly)
+- Active businesses (made booking in last 30 days)
+- Bookings per business
+- Booking completion rate
+- Time to first booking (onboarding speed)
+- Churn rate
+
+================================================================================
+11. RISKS & MITIGATIONS
+================================================================================
+
+RISK: Email deliverability
+- Bookings fail if emails don't arrive
+- MITIGATION: Use reputable provider (Resend), warm up domain, monitor bounces
+
+RISK: No-shows / spam bookings
+- Fake bookings waste owner time
+- MITIGATION: Email verification for customers, rate limiting, future: deposits
+
+RISK: Timezone confusion
+- Wrong appointment times
+- MITIGATION: Clear timezone display, store all times in UTC, convert for display
+
+RISK: Mobile-only limits growth
+- Some users prefer desktop
+- MITIGATION: Ensure responsive works on desktop, prioritize but don't block
+
+================================================================================
+12. FUTURE ROADMAP (Post-MVP)
+================================================================================
+
+v1.1 - Customer Management
+- Customer profiles
+- Booking history
+- Notes and preferences
+
+v1.2 - Calendar Sync
+- Google Calendar integration
+- Apple Calendar integration
+
+v1.3 - Team Features
+- Multi-user support
+- Staff management
+- Per-staff availability
+
+v2.0 - Payments
+- Payment processing
+- Deposits for bookings
+- Revenue through platform
+
+================================================================================
+13. DECISIONS LOG
+================================================================================
+
+1. Booking page URL structure
+   - DECISION: TBD
+   - Options under consideration:
+     - booking.salonos.io/{slug}
+     - {slug}.salonos.io
+     - salonos.io/book/{slug}
+
+2. Invite system implementation
+   - DECISION: Email link with invite code
+   - Users receive email with unique invite link
+   - Link contains invite code for signup
+
+3. Reminder timing
+   - DECISION: 24 hours before (fixed)
+   - Not configurable in MVP
+   - May add owner configuration later
+
+4. Guest vs. registered customers
+   - DECISION: Both supported
+   - Guest bookings: Name + email + phone (optional)
+   - Registered customers: Can view their booking history
+   - No account required to book
+
+================================================================================
+END OF DOCUMENT
+================================================================================
