@@ -73,7 +73,7 @@ export default function Sidebar({ organization }: { organization: string }) {
   const selectedPath = pathname.split("/")[3] || "overview";
 
   return (
-    <aside className="bg-surface w-72  p-4 py-6 flex-col gap-6 border-r border-separator hidden md:flex">
+    <aside className="bg-surface w-70 shrink-0 p-4 py-6 flex-col gap-6 border-r border-separator hidden md:flex">
       <p className="text-center text-xl">
         salon<b>OS</b>
       </p>
@@ -104,6 +104,7 @@ export default function Sidebar({ organization }: { organization: string }) {
                     fullWidth: true,
                   }),
                   "justify-start",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
                   isActive && "pointer-events-none"
                 )}
               >
