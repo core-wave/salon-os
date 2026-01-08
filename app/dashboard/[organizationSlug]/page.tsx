@@ -8,11 +8,11 @@ import { Icon } from "@iconify/react";
 export default async function OverviewPage({
   params,
 }: {
-  params: Promise<{ locationSlug: string }>;
+  params: Promise<{ organizationSlug: string }>;
 }) {
-  const { locationSlug } = await params;
+  const { organizationSlug } = await params;
 
-  const location = await salonCore.getLocationBySlug(locationSlug);
+  const location = await salonCore.getLocationBySlug(organizationSlug);
   const appointments = await location.listAppointments();
 
   const nextAppointment = appointments.find((apt) => apt.status === "Planned");

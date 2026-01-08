@@ -19,11 +19,11 @@ import AppointmentRow from "@/components/appointment-row";
 export default async function AppointmentsPage({
   params,
 }: {
-  params: Promise<{ locationSlug: string }>;
+  params: Promise<{ organizationSlug: string }>;
 }) {
-  const { locationSlug } = await params;
+  const { organizationSlug } = await params;
 
-  const location = await salonCore.getLocationBySlug(locationSlug); // this is fake
+  const location = await salonCore.getLocationBySlug(organizationSlug); // this is fake
   const appointments = await location.listAppointments();
 
   return (
