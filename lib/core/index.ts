@@ -18,22 +18,24 @@ class Core {
   }
 
   public async getOrganizationBySlug(id: string): Promise<COrganization> {
-    return new COrganization(id, "Placeholder");
+    return new COrganization(id, "Placeholder", "/placeholder");
   }
 
   public async listAvailableOrganizations(): Promise<COrganization[]> {
     const result = await db.select().from(organization).execute();
-    return result.map((x) => new COrganization(x.id, x.name));
+    return result.map((x) => new COrganization(x.id, x.name, x.slug));
   }
 }
 
 class COrganization {
   readonly id: string;
   readonly name: string;
+  readonly slug: string;
 
-  constructor(id: string, name: string) {
+  constructor(id: string, name: string, slug: string) {
     this.id = id;
     this.name = name;
+    this.slug = slug;
   }
 
   public async listAppointmentTypes(): Promise<CAppointmentType[]> {
