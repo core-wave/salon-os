@@ -43,8 +43,15 @@ class Core {
   }
 
   public async listAvailableOrganizations(): Promise<COrganization[]> {
-    const result = await db.select().from(organization).execute();
-    return result.map((x) => new COrganization(x.id, x.name, x.slug));
+    try {
+      const res = await auth.api.listOrganizations({
+        headers: await headers(),
+      });
+
+      return res.map((x) => new COrganization(x.id, x.name, x.slug));
+    } catch (error) {
+      return [];
+    }
   }
 }
 
