@@ -4,6 +4,7 @@ import { db } from "../db";
 import { organization } from "../db/auth";
 import { CAppointment } from "./types/appointment";
 import { CAppointmentType } from "./types/appointment_type";
+import { InsertLocation, locations } from "../db/schema";
 
 class Core {
   public async createOrganization(slug: string, name: string, userId: string) {
@@ -64,6 +65,19 @@ class COrganization {
     this.id = id;
     this.name = name;
     this.slug = slug;
+  }
+
+  public async createLocation(data: InsertLocation) {
+    try {
+      const res = await db
+        .insert(locations)
+        .values(data)
+        .returning({ id: locations.id, slug: locations.slug });
+
+      return res;
+    } catch (error) {
+      return null;
+    }
   }
 
   public async listAppointmentTypes(): Promise<CAppointmentType[]> {

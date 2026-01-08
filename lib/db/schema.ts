@@ -12,6 +12,8 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import { v7 as uuidv7 } from "uuid";
+
 export * from "./auth";
 
 import { organization, user } from "./auth";
@@ -19,7 +21,7 @@ import { organization, user } from "./auth";
 export const locations = pgTable(
   "locations",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
 
     organizationId: varchar("organization_id", { length: 255 })
       .notNull()
@@ -30,7 +32,7 @@ export const locations = pgTable(
     slug: text("slug").notNull().unique(),
 
     address1: varchar("address1", { length: 255 }).notNull(),
-    address2: varchar("address2", { length: 255 }).notNull(),
+    address2: varchar("address2", { length: 255 }),
 
     postalCode: varchar("postal_code", { length: 32 }).notNull(),
     city: varchar("city", { length: 255 }).notNull(),
@@ -40,10 +42,12 @@ export const locations = pgTable(
 
     isActive: boolean("is_active").notNull(),
 
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
   },
   (t) => [index("location_org_idx").on(t.organizationId)]
 );
+
+export type InsertLocation = typeof locations.$inferInsert;
 
 export const openingHours = pgTable(
   "opening_hours",
@@ -64,7 +68,7 @@ export const openingHours = pgTable(
   },
   (t) => [
     index("opening_hours_location_idx").on(t.locationId),
-    uniqueIndex("opening_hours_unique").on(t.locationId, t.dayOfWeek)
+    uniqueIndex("opening_hours_unique").on(t.locationId, t.dayOfWeek),
   ]
 );
 
@@ -88,7 +92,7 @@ export const openingHourExceptions = pgTable(
   },
   (t) => [
     index("opening_exception_location_idx").on(t.locationId),
-    uniqueIndex("opening_exception_unique").on(t.locationId, t.date)
+    uniqueIndex("opening_exception_unique").on(t.locationId, t.date),
   ]
 );
 
