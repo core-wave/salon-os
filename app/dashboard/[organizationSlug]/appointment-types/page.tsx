@@ -2,6 +2,7 @@ import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
 import { Button, Card, Chip, Label, Separator } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { notFound } from "next/navigation";
 import { Fragment } from "react/jsx-runtime";
 
 export default async function AppointmentTypesPage({
@@ -12,6 +13,9 @@ export default async function AppointmentTypesPage({
   const { organizationSlug } = await params;
 
   const org = await salonCore.getOrganizationBySlug(organizationSlug);
+
+  if (!org) notFound();
+
   const appointmentTypes = await org.listAppointmentTypes();
 
   console.log(appointmentTypes);

@@ -8,6 +8,7 @@ import { CAppointmentType } from "./types/appointment_type";
 class Core {
   public async createOrganization(slug: string, name: string, userId: string) {
     const res = await auth.api.createOrganization({
+      headers: await headers(),
       body: { name, slug, userId },
     });
 
@@ -23,8 +24,8 @@ class Core {
   ): Promise<COrganization | null> {
     try {
       const res = await auth.api.getFullOrganization({
-        query: { organizationSlug: slug },
         headers: await headers(),
+        query: { organizationSlug: slug },
       });
 
       if (!res) return null;
