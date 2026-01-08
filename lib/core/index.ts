@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { auth } from "../auth";
 import { db } from "../db";
 import { organization } from "../db/auth";
@@ -10,15 +11,34 @@ class Core {
       body: { name, slug, userId },
     });
 
-    return res ? { slug: res.slug } : res;
+    return res ? { slug: res.slug } : null;
   }
 
   public async getLocationBySlug(slug: string): Promise<CLocation> {
     return new CLocation();
   }
 
-  public async getOrganizationBySlug(id: string): Promise<COrganization> {
-    return new COrganization(id, "Placeholder", "/placeholder");
+  public async getOrganizationBySlug(
+    slug: string
+  ): Promise<COrganization | null> {
+    try {
+      const res = await auth.api.getFullOrganization({
+        query: { organizationSlug: slug },
+        headers: await headers(),
+      });
+
+      if (!res) return null;
+
+      return new COrganization(res.id, res.name, res.slug);
+    } catch (error) {
+      // Optional: log unexpected errors
+      console.error("getOrganizationBySlug failed", {
+        slug,
+        error,
+      });
+
+      return null;
+    }
   }
 
   public async listAvailableOrganizations(): Promise<COrganization[]> {

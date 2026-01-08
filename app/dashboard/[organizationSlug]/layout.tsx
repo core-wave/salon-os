@@ -19,11 +19,15 @@ export default async function DashboardLayout({
 
   if (!session) notFound(); // should never happen, but safe
 
+  console.log(organizationSlug);
+
   const org = await salonCore.getOrganizationBySlug(organizationSlug);
 
   if (!org) {
     notFound(); // org does not exist
   }
+
+  // TODO: validate access
 
   return (
     <div className="max-h-dvh flex w-full overflow-hidden">

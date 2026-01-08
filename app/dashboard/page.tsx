@@ -12,7 +12,7 @@ export default async function DashboardPage() {
       {organizations.map((org) => (
         <Link
           key={org.id}
-          href={`/dashboard/${org.id}`}
+          href={`/dashboard/${org.slug}`}
           className={cn(buttonVariants({ variant: "primary" }))}
         >
           {org.name}
