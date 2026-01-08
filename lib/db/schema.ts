@@ -40,14 +40,15 @@ export const locations = pgTable(
 
     phone: varchar("phone", { length: 32 }),
 
-    isActive: boolean("is_active").notNull(),
+    isActive: boolean("is_active").notNull().default(false),
 
-    createdAt: timestamp("created_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [index("location_org_idx").on(t.organizationId)]
 );
 
 export type InsertLocation = typeof locations.$inferInsert;
+export type SelectLocation = typeof locations.$inferSelect;
 
 export const openingHours = pgTable(
   "opening_hours",

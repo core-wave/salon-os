@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 import { auth } from "../auth";
 import { db } from "../db";
-import { organization } from "../db/auth";
 import { CAppointment } from "./types/appointment";
 import { CAppointmentType } from "./types/appointment_type";
-import { InsertLocation, locations } from "../db/schema";
+import { SelectLocation, InsertLocation, locations } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 class Core {
   public async createOrganization(slug: string, name: string, userId: string) {
@@ -77,6 +77,19 @@ class COrganization {
       return res;
     } catch (error) {
       return null;
+    }
+  }
+
+  public async listLocations(orgId: string): Promise<SelectLocation[]> {
+    try {
+      const res = await db
+        .select()
+        .from(locations)
+        .where(eq(locations.organizationId, orgId));
+
+      return res;
+    } catch (error) {
+      return [];
     }
   }
 
