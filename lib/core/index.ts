@@ -7,12 +7,18 @@ import { CAppointmentType } from "./types/appointment_type";
 
 class Core {
   public async createOrganization(slug: string, name: string, userId: string) {
-    const res = await auth.api.createOrganization({
-      headers: await headers(),
-      body: { name, slug, userId },
-    });
+    try {
+      const res = await auth.api.createOrganization({
+        headers: await headers(),
+        body: { name, slug, userId },
+      });
 
-    return res ? { slug: res.slug } : null;
+      if (!res) return null;
+
+      return { slug: res.slug };
+    } catch (error) {
+      return null;
+    }
   }
 
   public async getLocationBySlug(slug: string): Promise<CLocation> {
@@ -32,12 +38,6 @@ class Core {
 
       return new COrganization(res.id, res.name, res.slug);
     } catch (error) {
-      // Optional: log unexpected errors
-      console.error("getOrganizationBySlug failed", {
-        slug,
-        error,
-      });
-
       return null;
     }
   }
