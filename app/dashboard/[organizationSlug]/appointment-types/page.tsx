@@ -18,8 +18,6 @@ export default async function AppointmentTypesPage({
 
   const appointmentTypes = await org.listAppointmentTypes();
 
-  console.log(appointmentTypes);
-
   return (
     <>
       <DashboardPageHeader

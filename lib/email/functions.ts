@@ -14,8 +14,6 @@ export async function sendVerificationEmail({
   user,
   url,
 }: SendVerificationEmailProps) {
-  console.log("sending email....");
-
   const verificationUrl = new URL(url);
   verificationUrl.searchParams.set("callbackURL", "/dashboard");
 
@@ -33,6 +31,4 @@ export async function sendVerificationEmail({
     html: htmlEmail,
     text: textEmail,
   });
-
-  console.log(res);
 }

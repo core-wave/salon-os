@@ -18,14 +18,9 @@ export async function signup(
     name: formData.get("name") as string,
   };
 
-  console.log("rawData:", rawData);
-
   const parsed = signupSchema.safeParse(rawData);
 
-  console.log("parsed:", parsed);
-
   if (!parsed.success) {
-    console.log("parsing error");
     return {
       status: "error",
       fieldErrors: z.treeifyError(parsed.error).properties,
@@ -41,11 +36,7 @@ export async function signup(
         name: parsed.data.name,
       },
     });
-
-    console.log("res:", res);
   } catch (error) {
-    console.log("error:", error);
-
     if (error instanceof APIError) {
       const message = String(error.message);
 
@@ -61,8 +52,6 @@ export async function signup(
       formErrors: ["An unknown error occurred"],
     };
   }
-
-  console.log("success");
 
   return { status: "success", fieldValues: parsed.data };
 }

@@ -7,7 +7,11 @@ import { SelectLocation, InsertLocation, locations } from "../db/schema";
 import { eq } from "drizzle-orm";
 
 class Core {
-  public async createOrganization(slug: string, name: string, userId: string) {
+  public async createOrganization(
+    slug: string,
+    name: string,
+    userId: string
+  ): Promise<COrganization | null> {
     try {
       const res = await auth.api.createOrganization({
         headers: await headers(),
@@ -16,8 +20,9 @@ class Core {
 
       if (!res) return null;
 
-      return { slug: res.slug };
+      return new COrganization(res.id, res.name, res.slug);
     } catch (error) {
+      console.log(error);
       return null;
     }
   }
@@ -76,6 +81,7 @@ class COrganization {
 
       return res;
     } catch (error) {
+      console.log(error);
       return null;
     }
   }

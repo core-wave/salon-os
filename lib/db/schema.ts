@@ -10,6 +10,7 @@ import {
   time,
   index,
   uniqueIndex,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 
 import { v7 as uuidv7 } from "uuid";
@@ -29,14 +30,22 @@ export const locations = pgTable(
 
     name: varchar("name", { length: 255 }).notNull(), // e.g. "Main salon"
 
-    slug: text("slug").notNull().unique(),
+    slug: text("slug").notNull(), // TODO: make this, in combination with orgSlug, unique
 
-    address1: varchar("address1", { length: 255 }).notNull(),
-    address2: varchar("address2", { length: 255 }),
+    placeId: text("place_id").notNull(),
+    formattedAddress: text("formatted_address").notNull(),
+    googleMapsUri: text("google_maps_uri").notNull(),
+    timeZone: text("time_zone").notNull(),
 
-    postalCode: varchar("postal_code", { length: 32 }).notNull(),
-    city: varchar("city", { length: 255 }).notNull(),
-    country: varchar("country", { length: 2 }).notNull(),
+    streetName: text("street_name"),
+    streetNumber: text("street_number"),
+    postalCode: text("postal_code"),
+    city: text("city").notNull(),
+    administrativeArea: text("administrative_area"),
+    countryCode: text("country_code").notNull(),
+
+    lat: doublePrecision("lat").notNull(),
+    lng: doublePrecision("lng").notNull(),
 
     phone: varchar("phone", { length: 32 }),
 
@@ -130,7 +139,7 @@ export const appointments = pgTable(
       .notNull()
       .references(() => locations.id),
 
-    customerId: uuid("customer_id")
+    customerId: text("customer_id")
       .notNull()
       .references(() => user.id),
 
