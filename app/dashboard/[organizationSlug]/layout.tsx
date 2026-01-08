@@ -1,5 +1,9 @@
 import Sidebar from "@/components/layout/sidebar";
+import { auth } from "@/lib/auth";
+import { salonCore } from "@/lib/core";
 import { ScrollShadow } from "@heroui/react";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
 export default async function DashboardLayout({
@@ -10,6 +14,16 @@ export default async function DashboardLayout({
   params: Promise<{ organizationSlug: string }>;
 }) {
   const { organizationSlug } = await params;
+
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) notFound(); // should never happen, but safe
+
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+
+  if (!org) {
+    notFound(); // org does not exist
+  }
 
   return (
     <div className="max-h-dvh flex w-full overflow-hidden">
