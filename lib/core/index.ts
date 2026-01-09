@@ -81,11 +81,9 @@ class COrganization {
 
   public async createLocation(data: InsertLocation): Promise<CLocation | null> {
     try {
-      const res = await db.insert(locations).values(data);
+      const [row] = await db.insert(locations).values(data).returning();
 
-      if (!res) return null;
-
-      return new CLocation(res[0]);
+      return row ? new CLocation(row) : null;
     } catch (error) {
       console.error("error creating location:", error);
       return null;
@@ -95,25 +93,21 @@ class COrganization {
   public async updateLocation(
     id: SelectLocation["id"],
     data: Partial<Omit<SelectLocation, "id">>
-  ): Promise<CLocation | null> {
+  ): Promise<boolean> {
     try {
       const res = await db
         .update(locations)
         .set(data)
         .where(eq(locations.id, id));
 
-      if (!res) return null;
-
-      return new CLocation(res[0]);
+      return res.count === 1;
     } catch (error) {
       console.error("error updating location:", error);
-      return null;
+      return false;
     }
   }
 
-  public async deleteLocation(
-    id: SelectAppointmentType["id"]
-  ): Promise<boolean> {
+  public async deleteLocation(id: SelectLocation["id"]): Promise<boolean> {
     try {
       const res = await db.delete(locations).where(eq(locations.id, id));
 
