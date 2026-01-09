@@ -36,8 +36,7 @@ export async function createOrganization(
   try {
     const [org, placeDetails] = await Promise.all([
       salonCore.createOrganization(
-        parsed.data.slug,
-        parsed.data.name,
+        { name: parsed.data.name, slug: parsed.data.slug },
         parsed.data.userId
       ),
       getPlaceDetails(parsed.data.placeId),
@@ -56,7 +55,7 @@ export async function createOrganization(
     const location = await org.createLocation({
       name: placeDetails.city,
       slug: slugify(placeDetails.city),
-      organizationId: org.id,
+      organizationId: org.data.id,
       ...placeDetails,
     });
 
@@ -68,7 +67,7 @@ export async function createOrganization(
       };
     }
 
-    organizationSlug = org.slug;
+    organizationSlug = org.data.slug;
   } catch (error) {
     if (error instanceof APIError) {
       const message = String(error.message);

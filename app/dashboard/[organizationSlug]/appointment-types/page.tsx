@@ -1,13 +1,7 @@
+import DeleteAppointmentType from "@/components/delete-appointment-type";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
-import {
-  Button,
-  ButtonGroup,
-  Card,
-  Chip,
-  Label,
-  Separator,
-} from "@heroui/react";
+import { Button, Card, Chip, Label, Separator } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { notFound } from "next/navigation";
 import { Fragment } from "react/jsx-runtime";
@@ -47,9 +41,11 @@ export default async function AppointmentTypesPage({
           {appointmentTypes.map((type, idx) => (
             <Fragment key={idx}>
               <Separator className="col-span-5" />
-              <Label className="font-medium">{type.title}</Label>
-              <Label className="font-normal">{type.duration} min</Label>
-              <Label className="font-normal">{type.price} eur</Label>
+              <Label className="font-medium">{type.name}</Label>
+              <Label className="font-normal">{type.durationMinutes} min</Label>
+              <Label className="font-normal">
+                {type.price} {type.currency}
+              </Label>
               <Chip
                 color="success"
                 variant="soft"
@@ -61,13 +57,10 @@ export default async function AppointmentTypesPage({
                 <Button isIconOnly variant="ghost">
                   <Icon icon={`tabler:pencil`} />
                 </Button>
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  className={`text-danger hover:bg-danger-soft`}
-                >
-                  <Icon icon={`tabler:trash`} />
-                </Button>
+                <DeleteAppointmentType
+                  type="Appointment Type"
+                  description={`Are you sure you want to delete ${type.name}?`}
+                />
               </div>
             </Fragment>
           ))}

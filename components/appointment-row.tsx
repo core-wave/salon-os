@@ -1,5 +1,7 @@
 import { CAppointment } from "@/lib/core/types/appointment";
+import { SelectAppointment } from "@/lib/db/schema";
 import { Avatar, Chip, Label, Separator } from "@heroui/react";
+import { keyof } from "zod";
 
 const statusColorMap: Record<
   CAppointment["status"],
@@ -12,13 +14,11 @@ const statusColorMap: Record<
 };
 
 export default async function AppointmentRow({
-  appointmentType,
-  customer,
-  date,
-  duration,
+  appointmentTypeId,
+  customerId,
+  startsAt,
   status,
-  time,
-}: CAppointment) {
+}: SelectAppointment) {
   return (
     <>
       <Separator className="col-span-5" />
@@ -26,28 +26,26 @@ export default async function AppointmentRow({
       <div className="flex items-center gap-3">
         <Avatar>
           <Avatar.Image
-            alt={customer.fullName}
-            src={`https://tapback.co/api/avatar/${customer.fullName}.webp`}
+            alt={customerId}
+            src={`https://tapback.co/api/avatar/${customerId}.webp`}
           />
           <Avatar.Fallback>JD</Avatar.Fallback>
         </Avatar>
         <div className="flex flex-col">
-          <Label>{customer.fullName}</Label>
-          <Label className="font-normal text-sm text-muted">
-            {customer.email}
-          </Label>
+          <Label>{customerId}</Label>
+          <Label className="font-normal text-sm text-muted">{customerId}</Label>
         </div>
       </div>
 
-      <Label className="font-normal">{date}</Label>
+      <Label className="font-normal">{startsAt.toDateString()}</Label>
 
-      <Label className="font-normal">{time}</Label>
+      <Label className="font-normal">{startsAt.toTimeString()}</Label>
 
-      <Label className="font-normal">{appointmentType}</Label>
+      <Label className="font-normal">{appointmentTypeId}</Label>
 
       <Chip
         className="justify-self-start w-fit"
-        color={statusColorMap[status]}
+        // color={statusColorMap[status as typeof keyof statusColorMap]}
         variant="soft"
       >
         {status}

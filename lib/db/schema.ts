@@ -19,6 +19,12 @@ export * from "./auth";
 
 import { organization, user } from "./auth";
 
+export type SelectOrganization = typeof organization.$inferSelect;
+export type InsertOrganiation = Omit<
+  typeof organization.$inferInsert,
+  "id" | "createdAt"
+>;
+
 export const locations = pgTable(
   "locations",
   {
@@ -62,7 +68,7 @@ export type SelectLocation = typeof locations.$inferSelect;
 export const openingHours = pgTable(
   "opening_hours",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
 
     locationId: uuid("location_id")
       .notNull()
@@ -74,7 +80,7 @@ export const openingHours = pgTable(
     opensAt: time("opens_at"),
     closesAt: time("closes_at"),
 
-    isClosed: boolean("is_closed").notNull(),
+    isClosed: boolean("is_closed").notNull().default(true),
   },
   (t) => [
     index("opening_hours_location_idx").on(t.locationId),
@@ -88,7 +94,7 @@ export type SelectOpeningHour = typeof openingHours.$inferSelect;
 export const openingHourExceptions = pgTable(
   "opening_hour_exceptions",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
 
     locationId: uuid("location_id")
       .notNull()
@@ -99,7 +105,7 @@ export const openingHourExceptions = pgTable(
     opensAt: time("opens_at"),
     closesAt: time("closes_at"),
 
-    isClosed: boolean("is_closed").notNull(),
+    isClosed: boolean("is_closed").notNull().default(true),
 
     remark: varchar("reason", { length: 255 }),
   },
@@ -117,7 +123,7 @@ export type SelectOpeningHourException =
 export const appointmentTypes = pgTable(
   "appointment_types",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
 
     organizationId: varchar("organization_id", { length: 255 })
       .notNull()
@@ -144,7 +150,7 @@ export type SelectAppointmentType = typeof appointmentTypes.$inferSelect;
 export const appointments = pgTable(
   "appointments",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
 
     locationId: uuid("location_id")
       .notNull()
@@ -164,7 +170,7 @@ export const appointments = pgTable(
 
     notes: text("notes"),
 
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [
     index("appointment_user_idx").on(t.customerId),

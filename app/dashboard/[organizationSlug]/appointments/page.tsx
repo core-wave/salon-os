@@ -1,20 +1,16 @@
 import {
-  Avatar,
   Button,
   ButtonGroup,
   Card,
-  Chip,
   Label,
   ListBox,
   Select,
-  Separator,
 } from "@heroui/react";
-import { Fragment } from "react/jsx-runtime";
 import { Icon } from "@iconify/react";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
-import { CAppointment } from "@/lib/core/types/appointment";
 import { salonCore } from "@/lib/core";
 import AppointmentRow from "@/components/appointment-row";
+import { notFound } from "next/navigation";
 
 export default async function AppointmentsPage({
   params,
@@ -23,8 +19,15 @@ export default async function AppointmentsPage({
 }) {
   const { organizationSlug } = await params;
 
-  const location = await salonCore.getLocationBySlug(organizationSlug); // this is fake
-  const appointments = await location.listAppointments();
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+
+  if (!org) notFound();
+
+  const locations = await org.listLocations();
+
+  if (!locations) notFound();
+
+  const appointments = await locations[0].listAppointments();
 
   return (
     <>

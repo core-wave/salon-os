@@ -1,9 +1,9 @@
-import AppointmentCard from "@/components/appointment-card";
 import AppointmentRow from "@/components/appointment-row";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
 import { Button, Card } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { notFound } from "next/navigation";
 
 export default async function OverviewPage({
   params,
@@ -12,8 +12,15 @@ export default async function OverviewPage({
 }) {
   const { organizationSlug } = await params;
 
-  const location = await salonCore.getLocationBySlug(organizationSlug);
-  const appointments = await location.listAppointments();
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+
+  if (!org) notFound();
+
+  const locations = await org.listLocations();
+
+  if (!locations) notFound();
+
+  const appointments = await locations[0].listAppointments();
 
   const nextAppointment = appointments.find((apt) => apt.status === "Planned");
 

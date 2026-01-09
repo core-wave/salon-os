@@ -3,13 +3,24 @@ import { auth } from "../auth";
 import { db } from "../db";
 import { CAppointment } from "./types/appointment";
 import { CAppointmentType } from "./types/appointment_type";
-import { SelectLocation, InsertLocation, locations } from "../db/schema";
+import {
+  SelectLocation,
+  InsertLocation,
+  locations,
+  InsertAppointmentType,
+  SelectAppointmentType,
+  appointmentTypes,
+  SelectOrganization,
+  InsertOrganiation,
+  InsertAppointment,
+  appointments,
+  SelectAppointment,
+} from "../db/schema";
 import { eq } from "drizzle-orm";
 
 class Core {
   public async createOrganization(
-    slug: string,
-    name: string,
+    { name, slug }: InsertOrganiation,
     userId: string
   ): Promise<COrganization | null> {
     try {
@@ -20,19 +31,19 @@ class Core {
 
       if (!res) return null;
 
-      return new COrganization(res.id, res.name, res.slug);
+      return new COrganization(res);
     } catch (error) {
-      console.log(error);
+      console.error("error creating organization:", error);
       return null;
     }
   }
 
-  public async getLocationBySlug(slug: string): Promise<CLocation> {
-    return new CLocation();
-  }
+  //TODO: add update
+
+  //TODO: add delete
 
   public async getOrganizationBySlug(
-    slug: string
+    slug: SelectOrganization["slug"]
   ): Promise<COrganization | null> {
     try {
       const res = await auth.api.getFullOrganization({
@@ -42,8 +53,9 @@ class Core {
 
       if (!res) return null;
 
-      return new COrganization(res.id, res.name, res.slug);
+      return new COrganization(res);
     } catch (error) {
+      console.error("error getting organization:", error);
       return null;
     }
   }
@@ -54,336 +66,192 @@ class Core {
         headers: await headers(),
       });
 
-      return res.map((x) => new COrganization(x.id, x.name, x.slug));
+      return res.map((x) => new COrganization(x));
     } catch (error) {
+      console.error("error listing organizations:", error);
       return [];
     }
   }
 }
 
 class COrganization {
-  readonly id: string;
-  readonly name: string;
-  readonly slug: string;
+  constructor(readonly data: Omit<SelectOrganization, "metadata" | "logo">) {}
 
-  constructor(id: string, name: string, slug: string) {
-    this.id = id;
-    this.name = name;
-    this.slug = slug;
-  }
+  // Locations
 
-  public async createLocation(data: InsertLocation) {
+  public async createLocation(data: InsertLocation): Promise<CLocation | null> {
     try {
-      const res = await db
-        .insert(locations)
-        .values(data)
-        .returning({ id: locations.id, slug: locations.slug });
+      const res = await db.insert(locations).values(data);
 
-      return res;
+      if (!res) return null;
+
+      return new CLocation(res[0]);
     } catch (error) {
-      console.log(error);
+      console.error("error creating location:", error);
       return null;
     }
   }
 
-  public async listLocations(orgId: string): Promise<SelectLocation[]> {
+  public async updateLocation(
+    id: SelectLocation["id"],
+    data: Partial<Omit<SelectLocation, "id">>
+  ): Promise<CLocation | null> {
+    try {
+      const res = await db
+        .update(locations)
+        .set(data)
+        .where(eq(locations.id, id));
+
+      if (!res) return null;
+
+      return new CLocation(res[0]);
+    } catch (error) {
+      console.error("error updating location:", error);
+      return null;
+    }
+  }
+
+  public async deleteLocation(
+    id: SelectAppointmentType["id"]
+  ): Promise<boolean> {
+    try {
+      const res = await db.delete(locations).where(eq(locations.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting location:", error);
+      return false;
+    }
+  }
+
+  public async listLocations(): Promise<CLocation[]> {
     try {
       const res = await db
         .select()
         .from(locations)
-        .where(eq(locations.organizationId, orgId));
+        .where(eq(locations.organizationId, this.data.id));
 
-      return res;
+      return res.map((loc) => new CLocation(loc));
     } catch (error) {
+      console.error("error listing locations:", error);
       return [];
     }
   }
 
-  public async listAppointmentTypes(): Promise<CAppointmentType[]> {
-    return [
-      {
-        title: "Initial Consultation",
-        description:
-          "A short intake session to discuss your goals, assess your needs, and determine the best treatment plan.",
-        duration: 25,
-        price: 30.0,
-      },
-      {
-        title: "Follow-up Appointment",
-        description:
-          "A focused follow-up to evaluate progress, adjust the approach, and answer any remaining questions.",
-        duration: 20,
-        price: 25.0,
-      },
-      {
-        title: "Extended Treatment Session",
-        description:
-          "A longer, in-depth session designed for more complex treatments or multiple focus areas.",
-        duration: 50,
-        price: 55.0,
-      },
-      {
-        title: "Express Check-up",
-        description:
-          "A quick check-up for minor concerns or brief evaluations that don’t require a full session.",
-        duration: 15,
-        price: 20.0,
-      },
-      {
-        title: "Premium Consultation",
-        description:
-          "A comprehensive session with extended time, personalized advice, and detailed aftercare guidance.",
-        duration: 60,
-        price: 75.0,
-      },
-    ];
+  // Appointment Types
+
+  public async createAppointmentType(data: InsertAppointmentType) {
+    try {
+      const res = await db.insert(appointmentTypes).values(data);
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating appointment type:", error);
+      return false;
+    }
+  }
+
+  public async updateAppointmentType(
+    id: SelectAppointmentType["id"],
+    data: Partial<Omit<SelectAppointmentType, "id">>
+  ) {
+    try {
+      const res = await db
+        .update(appointmentTypes)
+        .set(data)
+        .where(eq(appointmentTypes.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating appointment type:", error);
+      return false;
+    }
+  }
+
+  public async deleteAppointmentType(id: SelectAppointmentType["id"]) {
+    try {
+      const res = await db
+        .delete(appointmentTypes)
+        .where(eq(appointmentTypes.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting appointment type:", error);
+      return false;
+    }
+  }
+
+  public async listAppointmentTypes() {
+    try {
+      const res = await db
+        .select()
+        .from(appointmentTypes)
+        .where(eq(appointmentTypes.organizationId, this.data.id));
+
+      return res;
+    } catch (error) {
+      console.error("error listing appointment types:", error);
+      return [];
+    }
   }
 }
 
 class CLocation {
-  public async listAppointments(): Promise<CAppointment[]> {
-    return [
-      {
-        customer: {
-          fullName: "Liam Johnson",
-          email: "liam.johnson@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "09:00",
-        duration: 30,
-        appointmentType: "Men’s Haircut",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Noah Williams",
-          email: "noah.williams@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "09:30",
-        duration: 45,
-        appointmentType: "Skin Fade",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Emma Brown",
-          email: "emma.brown@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "10:00",
-        duration: 45,
-        appointmentType: "Wash & Cut",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Olivia Jones",
-          email: "olivia.jones@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "10:30",
-        duration: 30,
-        appointmentType: "Blow Dry",
-        status: "Cancelled",
-      },
-      {
-        customer: {
-          fullName: "James Garcia",
-          email: "james.garcia@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "11:00",
-        duration: 15,
-        appointmentType: "Beard Trim",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Benjamin Miller",
-          email: "benjamin.miller@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "11:30",
-        duration: 30,
-        appointmentType: "Men’s Haircut",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Sophia Davis",
-          email: "sophia.davis@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "12:00",
-        duration: 60,
-        appointmentType: "Cut & Style",
-        status: "No Show",
-      },
-      {
-        customer: {
-          fullName: "Lucas Martinez",
-          email: "lucas.martinez@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "12:30",
-        duration: 45,
-        appointmentType: "Skin Fade",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Mason Rodriguez",
-          email: "mason.rodriguez@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "13:00",
-        duration: 30,
-        appointmentType: "Men’s Haircut",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Isabella Hernandez",
-          email: "isabella.hernandez@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "13:30",
-        duration: 45,
-        appointmentType: "Wash & Cut",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Ethan Lopez",
-          email: "ethan.lopez@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "14:00",
-        duration: 15,
-        appointmentType: "Beard Trim",
-        status: "Completed",
-      },
-      {
-        customer: {
-          fullName: "Ava Gonzalez",
-          email: "ava.gonzalez@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "14:30",
-        duration: 60,
-        appointmentType: "Cut & Style",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Alexander Wilson",
-          email: "alexander.wilson@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "15:00",
-        duration: 30,
-        appointmentType: "Men’s Haircut",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Mia Anderson",
-          email: "mia.anderson@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "15:30",
-        duration: 30,
-        appointmentType: "Blow Dry",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Daniel Thomas",
-          email: "daniel.thomas@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "16:00",
-        duration: 45,
-        appointmentType: "Skin Fade",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Charlotte Taylor",
-          email: "charlotte.taylor@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "16:30",
-        duration: 45,
-        appointmentType: "Wash & Cut",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Henry Moore",
-          email: "henry.moore@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "17:00",
-        duration: 30,
-        appointmentType: "Men’s Haircut",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Amelia Jackson",
-          email: "amelia.jackson@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "17:30",
-        duration: 60,
-        appointmentType: "Cut & Style",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Sebastian Martin",
-          email: "sebastian.martin@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "18:00",
-        duration: 15,
-        appointmentType: "Beard Trim",
-        status: "Planned",
-      },
-      {
-        customer: {
-          fullName: "Harper Lee",
-          email: "harper.lee@example.com",
-          imageSrc: "https://avatar.iran.liara.run/public",
-        },
-        date: "2026-01-06",
-        time: "18:30",
-        duration: 30,
-        appointmentType: "Men’s Haircut",
-        status: "Planned",
-      },
-    ];
+  constructor(private readonly data: SelectLocation) {}
+
+  // Appointments
+
+  public async createAppointment(data: InsertAppointment) {
+    try {
+      const res = await db.insert(appointments).values(data);
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating appointment:", error);
+      return false;
+    }
+  }
+
+  public async updateAppointment(
+    id: SelectAppointment["id"],
+    data: Partial<Omit<SelectAppointment, "id">>
+  ) {
+    try {
+      const res = await db
+        .update(appointments)
+        .set(data)
+        .where(eq(appointments.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating appointment:", error);
+      return false;
+    }
+  }
+
+  public async deleteAppointment(id: SelectAppointment["id"]) {
+    try {
+      const res = await db.delete(appointments).where(eq(appointments.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting appointment:", error);
+      return false;
+    }
+  }
+
+  public async listAppointments() {
+    try {
+      const res = await db
+        .select()
+        .from(appointments)
+        .where(eq(appointments.locationId, this.data.id));
+
+      return res;
+    } catch (error) {
+      console.error("error listing appointments:", error);
+      return [];
+    }
   }
 }
 
