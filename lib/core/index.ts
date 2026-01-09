@@ -11,7 +11,7 @@ import {
   SelectAppointmentType,
   appointmentTypes,
   SelectOrganization,
-  InsertOrganiation,
+  InsertOrganization,
   InsertAppointment,
   appointments,
   SelectAppointment,
@@ -20,7 +20,7 @@ import { eq } from "drizzle-orm";
 
 class Core {
   public async createOrganization(
-    { name, slug }: InsertOrganiation,
+    { name, slug }: InsertOrganization,
     userId: string
   ): Promise<COrganization | null> {
     try {

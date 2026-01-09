@@ -20,7 +20,7 @@ export * from "./auth";
 import { organization, user } from "./auth";
 
 export type SelectOrganization = typeof organization.$inferSelect;
-export type InsertOrganiation = Omit<
+export type InsertOrganization = Omit<
   typeof organization.$inferInsert,
   "id" | "createdAt"
 >;
