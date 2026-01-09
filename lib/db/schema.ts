@@ -82,6 +82,9 @@ export const openingHours = pgTable(
   ]
 );
 
+export type InsertOpeningHour = typeof openingHours.$inferInsert;
+export type SelectOpeningHour = typeof openingHours.$inferSelect;
+
 export const openingHourExceptions = pgTable(
   "opening_hour_exceptions",
   {
@@ -106,6 +109,11 @@ export const openingHourExceptions = pgTable(
   ]
 );
 
+export type InsertOpeningHourException =
+  typeof openingHourExceptions.$inferInsert;
+export type SelectOpeningHourException =
+  typeof openingHourExceptions.$inferSelect;
+
 export const appointmentTypes = pgTable(
   "appointment_types",
   {
@@ -123,12 +131,15 @@ export const appointmentTypes = pgTable(
     price: integer("price_cents").notNull(),
     currency: varchar("currency", { length: 3 }).notNull(),
 
-    isActive: boolean("is_active").notNull(),
+    isActive: boolean("is_active").notNull().default(false),
 
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [index("appt_type_org_idx").on(t.organizationId)]
 );
+
+export type InsertAppointmentType = typeof appointmentTypes.$inferInsert;
+export type SelectAppointmentType = typeof appointmentTypes.$inferSelect;
 
 export const appointments = pgTable(
   "appointments",
@@ -161,3 +172,6 @@ export const appointments = pgTable(
     index("appointment_start_idx").on(t.startsAt),
   ]
 );
+
+export type InsertAppointment = typeof appointments.$inferInsert;
+export type SelectAppointment = typeof appointments.$inferSelect;
