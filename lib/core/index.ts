@@ -1,20 +1,18 @@
 import { headers } from "next/headers";
 import { auth } from "../auth";
 import { db } from "../db";
-import {
-  SelectLocation,
-  InsertLocation,
-  locations,
-  InsertAppointmentType,
-  SelectAppointmentType,
-  appointmentTypes,
-  SelectOrganization,
-  InsertOrganization,
-  InsertAppointment,
-  appointments,
-  SelectAppointment,
-} from "../db/schema";
+import { locations, appointmentTypes, appointments } from "../db/schema";
 import { eq } from "drizzle-orm";
+import {
+  InsertAppointment,
+  InsertAppointmentType,
+  InsertLocation,
+  InsertOrganization,
+  SelectAppointment,
+  SelectAppointmentType,
+  SelectLocation,
+  SelectOrganization,
+} from "../db/types";
 
 class Core {
   public async createOrganization(
@@ -79,7 +77,10 @@ class COrganization {
 
   public async createLocation(data: InsertLocation): Promise<CLocation | null> {
     try {
-      const [row] = await db.insert(locations).values(data).returning();
+      const [row] = await db
+        .insert(locations)
+        .values({ ...data, organizationId: this.data.id })
+        .returning();
 
       return row ? new CLocation(row) : null;
     } catch (error) {
@@ -134,7 +135,9 @@ class COrganization {
 
   public async createAppointmentType(data: InsertAppointmentType) {
     try {
-      const res = await db.insert(appointmentTypes).values(data);
+      const res = await db
+        .insert(appointmentTypes)
+        .values({ ...data, organizationId: this.data.id });
 
       return res.count === 1;
     } catch (error) {
@@ -195,7 +198,9 @@ class CLocation {
 
   public async createAppointment(data: InsertAppointment) {
     try {
-      const res = await db.insert(appointments).values(data);
+      const res = await db
+        .insert(appointments)
+        .values({ ...data, locationId: this.data.id });
 
       return res.count === 1;
     } catch (error) {

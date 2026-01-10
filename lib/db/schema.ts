@@ -18,13 +18,6 @@ import { v7 as uuidv7 } from "uuid";
 export * from "./auth";
 
 import { organization, user } from "./auth";
-import { relations } from "drizzle-orm";
-
-export type SelectOrganization = typeof organization.$inferSelect;
-export type InsertOrganization = Omit<
-  typeof organization.$inferInsert,
-  "id" | "createdAt"
->;
 
 export const locations = pgTable(
   "locations",
@@ -63,9 +56,6 @@ export const locations = pgTable(
   (t) => [index("location_org_idx").on(t.organizationId)]
 );
 
-export type InsertLocation = typeof locations.$inferInsert;
-export type SelectLocation = typeof locations.$inferSelect;
-
 export const openingHours = pgTable(
   "opening_hours",
   {
@@ -88,9 +78,6 @@ export const openingHours = pgTable(
     uniqueIndex("opening_hours_unique").on(t.locationId, t.dayOfWeek),
   ]
 );
-
-export type InsertOpeningHour = typeof openingHours.$inferInsert;
-export type SelectOpeningHour = typeof openingHours.$inferSelect;
 
 export const openingHourExceptions = pgTable(
   "opening_hour_exceptions",
@@ -116,11 +103,6 @@ export const openingHourExceptions = pgTable(
   ]
 );
 
-export type InsertOpeningHourException =
-  typeof openingHourExceptions.$inferInsert;
-export type SelectOpeningHourException =
-  typeof openingHourExceptions.$inferSelect;
-
 export const appointmentTypes = pgTable(
   "appointment_types",
   {
@@ -145,12 +127,6 @@ export const appointmentTypes = pgTable(
   (t) => [index("appt_type_org_idx").on(t.organizationId)]
 );
 
-export type InsertAppointmentType = typeof appointmentTypes.$inferInsert;
-export type SelectAppointmentType = Omit<
-  typeof appointmentTypes.$inferSelect,
-  "organizationId"
->;
-
 export const appointments = pgTable(
   "appointments",
   {
@@ -170,7 +146,7 @@ export const appointments = pgTable(
 
     startsAt: timestamp("starts_at").notNull(),
 
-    status: varchar("status", { length: 32 }).notNull(),
+    status: varchar("status", { length: 32 }).notNull().default("Planned"),
 
     notes: text("notes"),
 
@@ -182,11 +158,3 @@ export const appointments = pgTable(
     index("appointment_start_idx").on(t.startsAt),
   ]
 );
-
-export type InsertAppointment = typeof appointments.$inferInsert;
-export type SelectAppointment = Omit<
-  typeof appointments.$inferSelect,
-  "locationId" | "appointmentTypeId"
-> & {
-  appointmentType: SelectAppointmentType;
-};
