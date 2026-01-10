@@ -1,8 +1,6 @@
 import { headers } from "next/headers";
 import { auth } from "../auth";
 import { db } from "../db";
-import { CAppointment } from "./types/appointment";
-import { CAppointmentType } from "./types/appointment_type";
 import {
   SelectLocation,
   InsertLocation,
@@ -234,14 +232,32 @@ class CLocation {
     }
   }
 
-  public async listAppointments() {
+  public async listAppointments(): Promise<SelectAppointment[]> {
     try {
-      const res = await db
-        .select()
+      return await db
+        .select({
+          id: appointments.id,
+          createdAt: appointments.createdAt,
+          startsAt: appointments.startsAt,
+          customerId: appointments.customerId,
+          status: appointments.status,
+          notes: appointments.notes,
+          appointmentType: {
+            id: appointmentTypes.id,
+            createdAt: appointmentTypes.createdAt,
+            name: appointmentTypes.name,
+            description: appointmentTypes.description,
+            durationMinutes: appointmentTypes.durationMinutes,
+            price: appointmentTypes.price,
+            currency: appointmentTypes.currency,
+            isActive: appointmentTypes.isActive,
+          },
+        })
         .from(appointments)
-        .where(eq(appointments.locationId, this.data.id));
-
-      return res;
+        .innerJoin(
+          appointmentTypes,
+          eq(appointments.appointmentTypeId, appointmentTypes.id)
+        );
     } catch (error) {
       console.error("error listing appointments:", error);
       return [];

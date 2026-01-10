@@ -18,6 +18,7 @@ import { v7 as uuidv7 } from "uuid";
 export * from "./auth";
 
 import { organization, user } from "./auth";
+import { relations } from "drizzle-orm";
 
 export type SelectOrganization = typeof organization.$inferSelect;
 export type InsertOrganization = Omit<
@@ -145,7 +146,10 @@ export const appointmentTypes = pgTable(
 );
 
 export type InsertAppointmentType = typeof appointmentTypes.$inferInsert;
-export type SelectAppointmentType = typeof appointmentTypes.$inferSelect;
+export type SelectAppointmentType = Omit<
+  typeof appointmentTypes.$inferSelect,
+  "organizationId"
+>;
 
 export const appointments = pgTable(
   "appointments",
@@ -180,4 +184,9 @@ export const appointments = pgTable(
 );
 
 export type InsertAppointment = typeof appointments.$inferInsert;
-export type SelectAppointment = typeof appointments.$inferSelect;
+export type SelectAppointment = Omit<
+  typeof appointments.$inferSelect,
+  "locationId" | "appointmentTypeId"
+> & {
+  appointmentType: SelectAppointmentType;
+};
