@@ -68,9 +68,9 @@ const sidebarCategories: SidebarCategory[] = [
   },
 ];
 
-export default function Sidebar({ organization }: { organization: string }) {
+export default function Sidebar({ slug }: { slug: string }) {
   const pathname = usePathname();
-  const selectedPath = pathname.split("/")[3] || "overview";
+  const selectedPath = pathname.split("/")[4] || "overview";
 
   return (
     <aside className="bg-surface w-70 shrink-0 p-4 py-6 flex-col gap-6 border-r border-separator hidden md:flex">
@@ -93,8 +93,8 @@ export default function Sidebar({ organization }: { organization: string }) {
                 prefetch
                 href={
                   item.slug === "overview"
-                    ? `/dashboard/${organization}`
-                    : `/dashboard/${organization}/${item.slug}`
+                    ? `/dashboard/${slug}`
+                    : `/dashboard/${slug}/${item.slug}`
                 }
                 key={item.slug}
                 aria-current={isActive ? "page" : undefined}

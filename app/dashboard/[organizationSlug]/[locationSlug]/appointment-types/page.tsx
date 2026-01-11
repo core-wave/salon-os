@@ -18,17 +18,14 @@ import CreateAppointmentTypeForm from "./form";
 export default async function AppointmentTypesPage({
   params,
 }: {
-  params: Promise<{ organizationSlug: string }>;
+  params: Promise<{ organizationSlug: string; locationSlug: string }>;
 }) {
-  const { organizationSlug } = await params;
+  const { organizationSlug, locationSlug } = await params;
 
-  const org = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!org) notFound();
-
-  const availableLocations = await org.listLocations();
-  if (!availableLocations) notFound();
-
-  const location = await org.getLocation(availableLocations[0].id);
+  const location = await salonCore.getLocationByFullSlug(
+    organizationSlug,
+    locationSlug
+  );
   if (!location) notFound();
 
   const appointmentTypes = await location.listAppointmentTypes();

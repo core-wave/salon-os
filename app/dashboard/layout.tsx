@@ -16,7 +16,5 @@ export default async function DashboardLayout({
     redirect("/auth/login"); // or "/auth/login"
   }
 
-  await getPlaceDetails("ChIJdz1T-pqEyEcRD_7fayoCREA");
-
   return children;
 }

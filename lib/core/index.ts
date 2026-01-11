@@ -66,6 +66,16 @@ class Core {
     }
   }
 
+  public async getLocationByFullSlug(
+    organizationSlug: SelectOrganization["slug"],
+    locationSlug: SelectLocation["slug"]
+  ): Promise<CLocation | null> {
+    const org = await this.getOrganizationBySlug(organizationSlug);
+    if (!org) return null;
+
+    return await org.getLocationBySlug(locationSlug);
+  }
+
   public async listAvailableOrganizations(): Promise<SelectOrganization[]> {
     try {
       const res = await auth.api.listOrganizations({
@@ -140,6 +150,49 @@ class COrganization {
         .from(locations)
         .where(
           and(eq(locations.organizationId, this.data.id), eq(locations.id, id))
+        )
+        .limit(1);
+
+      if (!res) return null;
+
+      return new CLocation({
+        id: res.id,
+        createdAt: res.createdAt,
+        name: res.name,
+        slug: res.slug,
+        isActive: res.isActive,
+        phone: res.phone,
+        formattedAddress: res.formattedAddress,
+        placeId: res.placeId,
+        googleMapsUri: res.googleMapsUri,
+        streetName: res.streetName,
+        streetNumber: res.streetNumber,
+        postalCode: res.postalCode,
+        city: res.city,
+        administrativeArea: res.administrativeArea,
+        countryCode: res.countryCode,
+        lat: res.lat,
+        lng: res.lng,
+        timeZone: res.timeZone,
+      });
+    } catch (error) {
+      console.error("error getting location:", error);
+      return null;
+    }
+  }
+
+  public async getLocationBySlug(
+    slug: SelectLocation["slug"]
+  ): Promise<CLocation | null> {
+    try {
+      const [res] = await db
+        .select()
+        .from(locations)
+        .where(
+          and(
+            eq(locations.organizationId, this.data.id),
+            eq(locations.slug, slug)
+          )
         )
         .limit(1);
 
