@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const geist = Geist({
+const inter = Inter({
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default function RootLayout({
     <html lang="en" className="light">
       <Providers>
         <body
-          className={`bg-background flex w-full min-h-dvh ${geist.className}`}
+          className={`bg-background flex w-full min-h-dvh ${inter.className}`}
         >
           {children}
         </body>

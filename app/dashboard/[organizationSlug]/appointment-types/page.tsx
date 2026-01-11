@@ -1,10 +1,19 @@
 import DeleteAppointmentType from "@/components/delete-appointment-type";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
-import { Button, Card, Chip, Label, Separator } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Chip,
+  Description,
+  Label,
+  Modal,
+  Separator,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { notFound } from "next/navigation";
 import { Fragment } from "react/jsx-runtime";
+import CreateAppointmentTypeForm from "./form";
 
 export default async function AppointmentTypesPage({
   params,
@@ -30,10 +39,7 @@ export default async function AppointmentTypesPage({
         title="Appointment Types"
         description="Manage your services and pricing"
       >
-        <Button>
-          <Icon icon={`tabler:plus`} />
-          New Appointment Type
-        </Button>
+        <CreateAppointmentTypeForm />
       </DashboardPageHeader>
 
       <Card className="gap-6">
@@ -52,11 +58,11 @@ export default async function AppointmentTypesPage({
                 {type.price} {type.currency}
               </Label>
               <Chip
-                color="success"
-                variant="soft"
+                color={type.isActive ? "success" : "default"}
+                variant={type.isActive ? "soft" : "soft"}
                 className="justify-self-start"
               >
-                Active
+                {type.isActive ? "Active" : "Inactive"}
               </Chip>
               <div className="flex">
                 <Button isIconOnly variant="ghost">
