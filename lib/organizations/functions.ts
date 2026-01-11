@@ -55,7 +55,6 @@ export async function createOrganization(
     const location = await org.createLocation({
       name: placeDetails.city,
       slug: slugify(placeDetails.city),
-      organizationId: org.data.id,
       ...placeDetails,
     });
 
