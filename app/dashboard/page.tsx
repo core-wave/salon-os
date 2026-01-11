@@ -11,18 +11,18 @@ export default async function DashboardPage() {
   }
 
   if (organizations.length === 1) {
-    redirect(`/dashboard/${organizations[0].data.slug}`);
+    redirect(`/dashboard/${organizations[0].slug}`);
   }
 
   return (
     <div className="w-full flex flex-col justify-center items-center gap-4">
       {organizations.map((org) => (
         <Link
-          key={org.data.id}
-          href={`/dashboard/${org.data.slug}`}
+          key={org.id}
+          href={`/dashboard/${org.slug}`}
           className={cn(buttonVariants({ variant: "primary" }))}
         >
-          {org.data.name}
+          {org.name}
         </Link>
       ))}
     </div>

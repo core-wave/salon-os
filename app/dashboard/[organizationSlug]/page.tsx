@@ -13,14 +13,15 @@ export default async function OverviewPage({
   const { organizationSlug } = await params;
 
   const org = await salonCore.getOrganizationBySlug(organizationSlug);
-
   if (!org) notFound();
 
-  const locations = await org.listLocations();
+  const availableLocations = await org.listLocations();
+  if (!availableLocations) notFound();
 
-  if (!locations) notFound();
+  const location = await org.getLocation(availableLocations[0].id);
+  if (!location) notFound();
 
-  const appointments = await locations[0].listAppointments();
+  const appointments = await location.listAppointments();
 
   const nextAppointment = appointments.find((apt) => apt.status === "Planned");
 

@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "../auth";
 import { db } from "../db";
 import { locations, appointmentTypes, appointments } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   InsertAppointment,
   InsertAppointmentType,
@@ -27,7 +27,12 @@ class Core {
 
       if (!res) return null;
 
-      return new COrganization(res);
+      return new COrganization({
+        id: res.id,
+        createdAt: res.createdAt,
+        name: res.name,
+        slug: res.slug,
+      });
     } catch (error) {
       console.error("error creating organization:", error);
       return null;
@@ -49,20 +54,30 @@ class Core {
 
       if (!res) return null;
 
-      return new COrganization(res);
+      return new COrganization({
+        id: res.id,
+        createdAt: res.createdAt,
+        name: res.name,
+        slug: res.slug,
+      });
     } catch (error) {
       console.error("error getting organization:", error);
       return null;
     }
   }
 
-  public async listAvailableOrganizations(): Promise<COrganization[]> {
+  public async listAvailableOrganizations(): Promise<SelectOrganization[]> {
     try {
       const res = await auth.api.listOrganizations({
         headers: await headers(),
       });
 
-      return res.map((x) => new COrganization(x));
+      return res.map((x) => ({
+        id: x.id,
+        createdAt: x.createdAt,
+        name: x.name,
+        slug: x.slug,
+      }));
     } catch (error) {
       console.error("error listing organizations:", error);
       return [];
@@ -71,27 +86,26 @@ class Core {
 }
 
 class COrganization {
-  constructor(readonly data: Omit<SelectOrganization, "metadata" | "logo">) {}
+  constructor(readonly data: SelectOrganization) {}
 
   // Locations
 
-  public async createLocation(data: InsertLocation): Promise<CLocation | null> {
+  public async createLocation(data: InsertLocation): Promise<boolean> {
     try {
-      const [row] = await db
+      const res = await db
         .insert(locations)
-        .values({ ...data, organizationId: this.data.id })
-        .returning();
+        .values({ ...data, organizationId: this.data.id });
 
-      return row ? new CLocation(row) : null;
+      return res.count === 1;
     } catch (error) {
       console.error("error creating location:", error);
-      return null;
+      return false;
     }
   }
 
   public async updateLocation(
     id: SelectLocation["id"],
-    data: Partial<Omit<SelectLocation, "id">>
+    data: Partial<Omit<SelectLocation, "id" | "createdAt">>
   ): Promise<boolean> {
     try {
       const res = await db
@@ -117,14 +131,73 @@ class COrganization {
     }
   }
 
-  public async listLocations(): Promise<CLocation[]> {
+  public async getLocation(
+    id: SelectLocation["id"]
+  ): Promise<CLocation | null> {
+    try {
+      const [res] = await db
+        .select()
+        .from(locations)
+        .where(
+          and(eq(locations.organizationId, this.data.id), eq(locations.id, id))
+        )
+        .limit(1);
+
+      if (!res) return null;
+
+      return new CLocation({
+        id: res.id,
+        createdAt: res.createdAt,
+        name: res.name,
+        slug: res.slug,
+        isActive: res.isActive,
+        phone: res.phone,
+        formattedAddress: res.formattedAddress,
+        placeId: res.placeId,
+        googleMapsUri: res.googleMapsUri,
+        streetName: res.streetName,
+        streetNumber: res.streetNumber,
+        postalCode: res.postalCode,
+        city: res.city,
+        administrativeArea: res.administrativeArea,
+        countryCode: res.countryCode,
+        lat: res.lat,
+        lng: res.lng,
+        timeZone: res.timeZone,
+      });
+    } catch (error) {
+      console.error("error getting location:", error);
+      return null;
+    }
+  }
+
+  public async listLocations(): Promise<SelectLocation[]> {
     try {
       const res = await db
         .select()
         .from(locations)
         .where(eq(locations.organizationId, this.data.id));
 
-      return res.map((loc) => new CLocation(loc));
+      return res.map((x) => ({
+        id: x.id,
+        createdAt: x.createdAt,
+        name: x.name,
+        slug: x.slug,
+        isActive: x.isActive,
+        phone: x.phone,
+        formattedAddress: x.formattedAddress,
+        placeId: x.placeId,
+        googleMapsUri: x.googleMapsUri,
+        streetName: x.streetName,
+        streetNumber: x.streetNumber,
+        postalCode: x.postalCode,
+        city: x.city,
+        administrativeArea: x.administrativeArea,
+        countryCode: x.countryCode,
+        lat: x.lat,
+        lng: x.lng,
+        timeZone: x.timeZone,
+      }));
     } catch (error) {
       console.error("error listing locations:", error);
       return [];
@@ -133,7 +206,9 @@ class COrganization {
 
   // Appointment Types
 
-  public async createAppointmentType(data: InsertAppointmentType) {
+  public async createAppointmentType(
+    data: InsertAppointmentType
+  ): Promise<boolean> {
     try {
       const res = await db
         .insert(appointmentTypes)
@@ -149,7 +224,7 @@ class COrganization {
   public async updateAppointmentType(
     id: SelectAppointmentType["id"],
     data: Partial<Omit<SelectAppointmentType, "id">>
-  ) {
+  ): Promise<boolean> {
     try {
       const res = await db
         .update(appointmentTypes)
@@ -163,7 +238,9 @@ class COrganization {
     }
   }
 
-  public async deleteAppointmentType(id: SelectAppointmentType["id"]) {
+  public async deleteAppointmentType(
+    id: SelectAppointmentType["id"]
+  ): Promise<boolean> {
     try {
       const res = await db
         .delete(appointmentTypes)
@@ -176,14 +253,21 @@ class COrganization {
     }
   }
 
-  public async listAppointmentTypes() {
+  public async listAppointmentTypes(): Promise<SelectAppointmentType[]> {
     try {
-      const res = await db
-        .select()
+      return await db
+        .select({
+          id: appointmentTypes.id,
+          createdAt: appointmentTypes.createdAt,
+          name: appointmentTypes.name,
+          description: appointmentTypes.description,
+          durationMinutes: appointmentTypes.durationMinutes,
+          price: appointmentTypes.price,
+          currency: appointmentTypes.currency,
+          isActive: appointmentTypes.isActive,
+        })
         .from(appointmentTypes)
         .where(eq(appointmentTypes.organizationId, this.data.id));
-
-      return res;
     } catch (error) {
       console.error("error listing appointment types:", error);
       return [];
@@ -196,7 +280,7 @@ class CLocation {
 
   // Appointments
 
-  public async createAppointment(data: InsertAppointment) {
+  public async createAppointment(data: InsertAppointment): Promise<boolean> {
     try {
       const res = await db
         .insert(appointments)
@@ -212,7 +296,7 @@ class CLocation {
   public async updateAppointment(
     id: SelectAppointment["id"],
     data: Partial<Omit<SelectAppointment, "id">>
-  ) {
+  ): Promise<boolean> {
     try {
       const res = await db
         .update(appointments)
@@ -226,7 +310,9 @@ class CLocation {
     }
   }
 
-  public async deleteAppointment(id: SelectAppointment["id"]) {
+  public async deleteAppointment(
+    id: SelectAppointment["id"]
+  ): Promise<boolean> {
     try {
       const res = await db.delete(appointments).where(eq(appointments.id, id));
 
