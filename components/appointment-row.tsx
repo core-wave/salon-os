@@ -1,10 +1,8 @@
-import { CAppointment } from "@/lib/core/types/appointment";
 import { SelectAppointment } from "@/lib/db/types";
 import { Avatar, Chip, Label, Separator } from "@heroui/react";
-import { keyof } from "zod";
 
 const statusColorMap: Record<
-  CAppointment["status"],
+  SelectAppointment["status"],
   "success" | "warning" | "danger" | "default"
 > = {
   Planned: "warning",
