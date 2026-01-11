@@ -14,10 +14,15 @@ export default async function AppointmentTypesPage({
   const { organizationSlug } = await params;
 
   const org = await salonCore.getOrganizationBySlug(organizationSlug);
-
   if (!org) notFound();
 
-  const appointmentTypes = await org.listAppointmentTypes();
+  const availableLocations = await org.listLocations();
+  if (!availableLocations) notFound();
+
+  const location = await org.getLocation(availableLocations[0].id);
+  if (!location) notFound();
+
+  const appointmentTypes = await location.listAppointmentTypes();
 
   return (
     <>

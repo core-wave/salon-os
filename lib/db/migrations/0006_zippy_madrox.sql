@@ -1,0 +1,1 @@
+ALTER TABLE "appointment_types" ALTER COLUMN "location_id" DROP DEFAULT;

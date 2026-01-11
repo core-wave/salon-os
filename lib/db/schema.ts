@@ -110,9 +110,9 @@ export const appointmentTypes = pgTable(
   {
     id: uuid("id").primaryKey().$defaultFn(uuidv7),
 
-    organizationId: varchar("organization_id", { length: 255 })
+    locationId: uuid("location_id")
       .notNull()
-      .references(() => organization.id),
+      .references(() => locations.id),
 
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
@@ -126,7 +126,7 @@ export const appointmentTypes = pgTable(
 
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [index("appt_type_org_idx").on(t.organizationId)]
+  (t) => [index("appt_type_loc_idx").on(t.locationId)]
 );
 
 export const appointments = pgTable(

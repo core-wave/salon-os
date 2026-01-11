@@ -203,6 +203,10 @@ class COrganization {
       return [];
     }
   }
+}
+
+class CLocation {
+  constructor(private readonly data: SelectLocation) {}
 
   // Appointment Types
 
@@ -212,7 +216,7 @@ class COrganization {
     try {
       const res = await db
         .insert(appointmentTypes)
-        .values({ ...data, organizationId: this.data.id });
+        .values({ ...data, locationId: this.data.id });
 
       return res.count === 1;
     } catch (error) {
@@ -267,16 +271,12 @@ class COrganization {
           isActive: appointmentTypes.isActive,
         })
         .from(appointmentTypes)
-        .where(eq(appointmentTypes.organizationId, this.data.id));
+        .where(eq(appointmentTypes.locationId, this.data.id));
     } catch (error) {
       console.error("error listing appointment types:", error);
       return [];
     }
   }
-}
-
-class CLocation {
-  constructor(private readonly data: SelectLocation) {}
 
   // Appointments
 

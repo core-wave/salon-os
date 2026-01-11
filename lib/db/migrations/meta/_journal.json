@@ -36,6 +36,20 @@
       "when": 1768126498639,
       "tag": "0004_nosy_captain_britain",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1768131793210,
+      "tag": "0005_wild_piledriver",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768131814032,
+      "tag": "0006_zippy_madrox",
+      "breakpoints": true
     }
   ]
 }

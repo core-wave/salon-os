@@ -59,12 +59,12 @@ export type SelectOpeningHourException = Omit<
 
 export type InsertAppointmentType = Omit<
   typeof appointmentTypes.$inferInsert,
-  "id" | "createdAt" | "organizationId"
+  "id" | "createdAt" | "locationId"
 >;
 
 export type SelectAppointmentType = Omit<
   typeof appointmentTypes.$inferSelect,
-  "organizationId"
+  "locationId"
 >;
 
 // Appointments
