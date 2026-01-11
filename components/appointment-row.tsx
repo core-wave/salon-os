@@ -1,5 +1,5 @@
 import { CAppointment } from "@/lib/core/types/appointment";
-import { SelectAppointment } from "@/lib/db/schema";
+import { SelectAppointment } from "@/lib/db/types";
 import { Avatar, Chip, Label, Separator } from "@heroui/react";
 import { keyof } from "zod";
 
@@ -14,7 +14,7 @@ const statusColorMap: Record<
 };
 
 export default async function AppointmentRow({
-  appointmentTypeId,
+  appointmentType,
   customerId,
   startsAt,
   status,
@@ -41,11 +41,11 @@ export default async function AppointmentRow({
 
       <Label className="font-normal">{startsAt.toTimeString()}</Label>
 
-      <Label className="font-normal">{appointmentTypeId}</Label>
+      <Label className="font-normal">{appointmentType.name}</Label>
 
       <Chip
         className="justify-self-start w-fit"
-        // color={statusColorMap[status as typeof keyof statusColorMap]}
+        color={statusColorMap[status]}
         variant="soft"
       >
         {status}

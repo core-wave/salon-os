@@ -16,8 +16,10 @@ import {
 import { v7 as uuidv7 } from "uuid";
 
 export * from "./auth";
+export * from "./enums";
 
 import { organization, user } from "./auth";
+import { appointmentStatusEnum } from "./enums";
 
 export const locations = pgTable(
   "locations",
@@ -146,7 +148,7 @@ export const appointments = pgTable(
 
     startsAt: timestamp("starts_at").notNull(),
 
-    status: varchar("status", { length: 32 }).notNull().default("Planned"),
+    status: appointmentStatusEnum("status").notNull().default("Planned"),
 
     notes: text("notes"),
 
