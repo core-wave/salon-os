@@ -70,10 +70,8 @@ export const openingHours = pgTable(
     // 0 = Sunday, 6 = Saturday
     dayOfWeek: integer("day_of_week").notNull(),
 
-    opensAt: time("opens_at"),
-    closesAt: time("closes_at"),
-
-    isClosed: boolean("is_closed").notNull().default(true),
+    opensAt: time("opens_at").notNull(),
+    closesAt: time("closes_at").notNull(),
   },
   (t) => [
     index("opening_hours_location_idx").on(t.locationId),

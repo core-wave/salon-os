@@ -90,6 +90,40 @@ class Core {
 
   // Locations
 
+  public async getLocation(id: string): Promise<CLocation | null> {
+    try {
+      const [res] = await db
+        .select()
+        .from(locations)
+        .where(eq(locations.id, id))
+        .limit(1);
+
+      return new CLocation({
+        id: res.id,
+        createdAt: res.createdAt,
+        name: res.name,
+        slug: res.slug,
+        isActive: res.isActive,
+        phone: res.phone,
+        formattedAddress: res.formattedAddress,
+        placeId: res.placeId,
+        googleMapsUri: res.googleMapsUri,
+        streetName: res.streetName,
+        streetNumber: res.streetNumber,
+        postalCode: res.postalCode,
+        city: res.city,
+        administrativeArea: res.administrativeArea,
+        countryCode: res.countryCode,
+        lat: res.lat,
+        lng: res.lng,
+        timeZone: res.timeZone,
+      });
+    } catch (error) {
+      console.error("error getting location:", error);
+      return null;
+    }
+  }
+
   public async createLocation(data: InsertLocation): Promise<boolean> {
     try {
       const res = await db.insert(locations).values(data);
@@ -330,15 +364,52 @@ class CLocation {
         .select({
           id: openingHours.id,
           dayOfWeek: openingHours.dayOfWeek,
-          isClosed: openingHours.isClosed,
           opensAt: openingHours.opensAt,
           closesAt: openingHours.closesAt,
         })
         .from(openingHours)
         .where(eq(openingHours.locationId, this.data.id));
     } catch (error) {
-      console.error("error listing appointments:", error);
+      console.error("error listing opening hours:", error);
       return [];
+    }
+  }
+
+  public async deleteOpeningHours(dayOfWeek: number): Promise<boolean> {
+    try {
+      const res = await db
+        .delete(openingHours)
+        .where(
+          and(
+            eq(openingHours.locationId, this.data.id),
+            eq(openingHours.dayOfWeek, dayOfWeek)
+          )
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting opening hours:", error);
+      return false;
+    }
+  }
+
+  public async setOpeningHours(
+    dayOfWeek: number,
+    slots: { opensAt: string; closesAt: string }[]
+  ): Promise<boolean> {
+    const data = slots.map((slot) => ({
+      ...slot,
+      dayOfWeek,
+      locationId: this.data.id,
+    }));
+
+    try {
+      const res = await db.insert(openingHours).values(data);
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating opening hours:", error);
+      return false;
     }
   }
 

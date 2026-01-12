@@ -50,6 +50,13 @@
       "when": 1768131814032,
       "tag": "0006_zippy_madrox",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768254084589,
+      "tag": "0007_wise_william_stryker",
+      "breakpoints": true
     }
   ]
 }

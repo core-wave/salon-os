@@ -1,11 +1,11 @@
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { Card, Chip, Label, Separator } from "@heroui/react";
-import { mockOpeningHoursExceptions } from "@/lib/mockdata/opening-hours";
-import { Fragment } from "react/jsx-runtime";
+import { Fragment } from "react";
 import { salonCore } from "@/lib/core";
 import { notFound } from "next/navigation";
+import UpdateOpeningHoursForm from "@/components/forms/update-opening-hours";
 
-const DAY_LABELS = {
+const DAYS = {
   0: "Sunday",
   1: "Monday",
   2: "Tuesday",
@@ -14,6 +14,8 @@ const DAY_LABELS = {
   5: "Friday",
   6: "Saturday",
 } as const;
+
+type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export default async function OpeningHoursPage({
   params,
@@ -30,6 +32,21 @@ export default async function OpeningHoursPage({
 
   const regularOpeningHours = await location.listRegularOpeningHours();
 
+  const openingHoursByDay = Object.keys(DAYS).map((key) => {
+    const dayOfWeek = Number(key) as DayOfWeek;
+
+    const slots = regularOpeningHours.filter(
+      (slot) => slot.dayOfWeek === dayOfWeek
+    );
+
+    return {
+      dayOfWeek,
+      label: DAYS[dayOfWeek],
+      slots,
+      isClosed: slots.length === 0,
+    };
+  });
+
   return (
     <>
       <DashboardPageHeader
@@ -40,99 +57,50 @@ export default async function OpeningHoursPage({
       <Card className="gap-6">
         <h2 className="font-semibold text-lg">Regular Opening Hours</h2>
 
-        <div className="grid grid-cols-[auto_auto_auto] gap-y-3 gap-x-4 items-center">
-          {/* Header */}
-          <Label className="font-semibold">Day of Week</Label>
+        <div className="grid grid-cols-[auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+          <Label className="font-semibold">Day</Label>
           <Label className="font-semibold">Status</Label>
           <Label className="font-semibold">Opening Hours</Label>
+          <Label className="font-semibold">Actions</Label>
 
-          {/* Rows */}
-          {regularOpeningHours.map((day) => (
+          {openingHoursByDay.map((day) => (
             <Fragment key={day.dayOfWeek}>
-              <Separator className="col-span-3" />
-              {/* Day */}
-              {/* <Label className="font-normal">{DAY_LABELS[day.dayOfWeek]}</Label> */}
+              <Separator className="col-span-4" />
 
-              {/* Status */}
+              <Label>{day.label}</Label>
+
               {day.isClosed ? (
-                <Chip
-                  className="justify-self-start w-fit"
-                  color="default"
-                  variant="soft"
-                >
+                <Chip variant="soft" className="justify-self-start">
                   Closed
                 </Chip>
               ) : (
                 <Chip
-                  className="justify-self-start w-fit"
                   color="success"
                   variant="soft"
+                  className="justify-self-start"
                 >
                   Open
                 </Chip>
               )}
 
-              {/* Hours */}
               <div className="flex gap-2 flex-wrap">
                 {day.isClosed ? (
                   <Label className="text-muted">—</Label>
                 ) : (
-                  <Chip color="accent" variant="soft">
-                    {day.opensAt}–{day.closesAt}
-                  </Chip>
-                )}
-              </div>
-            </Fragment>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="gap-6">
-        <h2 className="font-semibold text-lg">Exceptions</h2>
-
-        <div className="grid grid-cols-[auto_auto_auto] gap-y-3 gap-x-4 items-center">
-          {/* Header */}
-          <Label className="font-semibold">Date</Label>
-          <Label className="font-semibold">Status</Label>
-          <Label className="font-semibold">Opening Hours</Label>
-
-          {/* Rows */}
-          {mockOpeningHoursExceptions.map((exc) => (
-            <Fragment key={exc.date}>
-              <Separator className="col-span-3" />
-              {/* Day */}
-              <Label className="font-normal">{exc.date}</Label>
-
-              {/* Status */}
-              {exc.isOpen ? (
-                <Chip
-                  className="justify-self-start w-fit"
-                  color="success"
-                  variant="soft"
-                >
-                  Open
-                </Chip>
-              ) : (
-                <Chip
-                  className="justify-self-start w-fit"
-                  color="default"
-                  variant="soft"
-                >
-                  Closed
-                </Chip>
-              )}
-
-              {/* Hours */}
-              <div className="flex gap-2 flex-wrap">
-                {exc.isOpen && exc.hours.length > 0 ? (
-                  exc.hours.map((slot, idx) => (
+                  day.slots.map((slot, idx) => (
                     <Chip key={idx} color="accent" variant="soft">
-                      {slot.start}–{slot.end}
+                      {slot.opensAt}–{slot.closesAt}
                     </Chip>
                   ))
-                ) : (
-                  <Label className="text-muted">—</Label>
                 )}
+              </div>
+
+              <div className="flex">
+                <UpdateOpeningHoursForm
+                  dayOfWeek={day.dayOfWeek}
+                  locationId={location.data.id}
+                  slots={day.slots}
+                />
               </div>
             </Fragment>
           ))}
