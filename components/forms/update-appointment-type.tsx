@@ -18,7 +18,7 @@ import {
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect } from "react";
 
 export default function UpdateAppointmentTypeForm({
   appointmentType,

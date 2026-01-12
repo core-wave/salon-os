@@ -29,6 +29,7 @@ export default function CreateAppointmentTypeForm({
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",
+    fieldValues: { currency: "EUR" },
   });
 
   const { open, close, isOpen, setOpen } = useOverlayState();
