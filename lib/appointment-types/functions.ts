@@ -23,6 +23,7 @@ export async function deleteAppointmentType(
 
 export async function createAppointmentType(
   locationId: string,
+  currency: string,
   prevState: FormState<AppointmentTypeFormProps>,
   formData: FormData
 ): Promise<FormState<AppointmentTypeFormProps>> {
@@ -31,7 +32,7 @@ export async function createAppointmentType(
     description: formData.get("description") as string,
     durationMinutes: Number(formData.get("durationMinutes")),
     price: Number(formData.get("price")),
-    currency: formData.get("currency") as string,
+    currency: currency,
     isActive: Boolean(formData.get("isActive")),
   };
 
@@ -63,7 +64,6 @@ export async function createAppointmentType(
 
   return {
     status: "success",
-    fieldValues: parsed.data,
   };
 }
 

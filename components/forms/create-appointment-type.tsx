@@ -22,14 +22,15 @@ import { useActionState, useEffect } from "react";
 
 export default function CreateAppointmentTypeForm({
   locationId,
+  currency,
 }: {
   locationId: string;
+  currency: string;
 }) {
-  const formAction = createAppointmentType.bind(null, locationId);
+  const formAction = createAppointmentType.bind(null, locationId, currency);
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",
-    fieldValues: { currency: "EUR" },
   });
 
   const { open, close, isOpen, setOpen } = useOverlayState();
@@ -129,12 +130,6 @@ export default function CreateAppointmentTypeForm({
                     </>
                   )}
                 </Switch>
-
-                <Input
-                  hidden
-                  name="currency"
-                  defaultValue={state.fieldValues?.currency}
-                />
               </Modal.Body>
               <Modal.Footer>
                 <Button onPress={close} variant="secondary">

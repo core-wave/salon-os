@@ -28,7 +28,11 @@ export default async function AppointmentTypesPage({
         title="Appointment Types"
         description="Manage your services and pricing"
       >
-        <CreateAppointmentTypeForm locationId={location.data.id} />
+        {/* TODO: Remove hardcoded currency */}
+        <CreateAppointmentTypeForm
+          locationId={location.data.id}
+          currency="EUR"
+        />
       </DashboardPageHeader>
 
       <Card className="gap-6">
@@ -38,8 +42,8 @@ export default async function AppointmentTypesPage({
           <Label className="font-semibold">Price</Label>
           <Label className="font-semibold">Status</Label>
           <Label className="font-semibold">Actions</Label>
-          {appointmentTypes.map((type, idx) => (
-            <Fragment key={idx}>
+          {appointmentTypes.map((type) => (
+            <Fragment key={type.id}>
               <Separator className="col-span-5" />
               <Label className="font-medium">{type.name}</Label>
               <Label className="font-normal">{type.durationMinutes} min</Label>
