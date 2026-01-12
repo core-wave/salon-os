@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createAppointmentTypeSchema = z.object({
+export const appointmentTypeFormSchema = z.object({
   name: z.string("Please enter a valid name").min(3),
   description: z.string().optional(),
   durationMinutes: z.number("Please enter a valid duration").min(1),
@@ -9,6 +9,6 @@ export const createAppointmentTypeSchema = z.object({
   isActive: z.boolean(),
 });
 
-export type CreateAppointmentTypeProps = z.infer<
-  typeof createAppointmentTypeSchema
+export type AppointmentTypeFormProps = z.infer<
+  typeof appointmentTypeFormSchema
 >;

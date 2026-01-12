@@ -141,8 +141,8 @@ export async function getPlaceDetails(
       lat: data.location.latitude,
       lng: data.location.longitude,
     };
-  } catch {
-    console.log("error");
+  } catch (error) {
+    console.error("error in getPlaceDetails:", error);
 
     return null;
   }

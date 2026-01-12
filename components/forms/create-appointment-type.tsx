@@ -1,6 +1,10 @@
 "use client";
 
-import { createAppointmentType } from "@/lib/appointment-types/functions";
+import {
+  createAppointmentType,
+  updateAppointmentType,
+} from "@/lib/appointment-types/functions";
+import { SelectAppointmentType } from "@/lib/db/types";
 import {
   Button,
   ErrorMessage,
@@ -25,7 +29,6 @@ export default function CreateAppointmentTypeForm({
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",
-    fieldValues: { currency: "EUR" },
   });
 
   const { open, close, isOpen, setOpen } = useOverlayState();
@@ -40,15 +43,15 @@ export default function CreateAppointmentTypeForm({
     <>
       <Button onPress={open}>
         <Icon icon={`tabler:plus`} />
-        New Appointment Type
+        New Appointment
       </Button>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={setOpen}>
         <Modal.Container>
           <Modal.Dialog>
             <Modal.Header>
-              <Modal.Heading>New Appointment Type</Modal.Heading>
+              <Modal.Heading>Update Appointment Type</Modal.Heading>
               <p className="text-sm leading-5 text-muted">
-                Enter the details for your new appointment type
+                Enter the details to update your appointment type
               </p>
             </Modal.Header>
             <form action={action}>
@@ -108,7 +111,10 @@ export default function CreateAppointmentTypeForm({
                   </TextField>
                 </div>
 
-                <Switch name="isActive">
+                <Switch
+                  name="isActive"
+                  defaultSelected={state.fieldValues?.isActive}
+                >
                   {({ isSelected }) => (
                     <>
                       <Switch.Control>

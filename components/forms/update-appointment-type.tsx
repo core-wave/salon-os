@@ -18,28 +18,20 @@ import {
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 export default function UpdateAppointmentTypeForm({
-  id,
-  name,
-  currency,
-  description,
-  durationMinutes,
-  isActive,
-  price,
-}: SelectAppointmentType & { locationId: string }) {
-  const formAction = updateAppointmentType.bind(null, id);
+  appointmentType,
+}: {
+  appointmentType: SelectAppointmentType;
+}) {
+  const formAction = updateAppointmentType.bind(null, appointmentType.id);
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",
     fieldValues: {
-      currency: currency,
-      description: description || "",
-      durationMinutes: durationMinutes,
-      isActive: isActive,
-      name: name,
-      price: price,
+      ...appointmentType,
+      description: appointmentType.description || "",
     },
   });
 

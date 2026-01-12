@@ -1,20 +1,11 @@
-import DeleteAppointmentType from "@/components/delete-appointment-type";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
-import {
-  Button,
-  Card,
-  Chip,
-  Description,
-  Label,
-  Modal,
-  Separator,
-} from "@heroui/react";
-import { Icon } from "@iconify/react";
+import { Card, Chip, Label, Separator } from "@heroui/react";
 import { notFound } from "next/navigation";
 import { Fragment } from "react/jsx-runtime";
-import CreateAppointmentTypeForm from "./form";
 import UpdateAppointmentTypeForm from "@/components/forms/update-appointment-type";
+import DeleteAppointmentTypeForm from "@/components/forms/delete-appointment-type";
+import CreateAppointmentTypeForm from "@/components/forms/create-appointment-type";
 
 export default async function AppointmentTypesPage({
   params,
@@ -63,14 +54,8 @@ export default async function AppointmentTypesPage({
                 {type.isActive ? "Active" : "Inactive"}
               </Chip>
               <div className="flex">
-                <UpdateAppointmentTypeForm
-                  {...type}
-                  locationId={location.data.id}
-                />
-                <DeleteAppointmentType
-                  type="Appointment Type"
-                  description={`Are you sure you want to delete ${type.name}?`}
-                />
+                <UpdateAppointmentTypeForm appointmentType={type} />
+                <DeleteAppointmentTypeForm id={type.id} />
               </div>
             </Fragment>
           ))}

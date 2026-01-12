@@ -3,18 +3,30 @@
 import z from "zod";
 import { FormState } from "../types";
 import { salonCore } from "../core";
-import {
-  CreateAppointmentTypeProps,
-  createAppointmentTypeSchema,
-} from "./schemas";
 import { revalidatePath } from "next/cache";
+import { AppointmentTypeFormProps, appointmentTypeFormSchema } from "./schemas";
+
+export async function deleteAppointmentType(
+  id: string,
+  prevState: "default" | "error" | "success"
+): Promise<"default" | "error" | "success"> {
+  const success = await salonCore.deleteAppointmentType(id);
+
+  if (!success) {
+    return "error";
+  }
+
+  revalidatePath("/");
+
+  return "success";
+}
 
 export async function createAppointmentType(
   locationId: string,
-  prevState: FormState<CreateAppointmentTypeProps>,
+  prevState: FormState<AppointmentTypeFormProps>,
   formData: FormData
-): Promise<FormState<CreateAppointmentTypeProps>> {
-  const rawData: CreateAppointmentTypeProps = {
+): Promise<FormState<AppointmentTypeFormProps>> {
+  const rawData: AppointmentTypeFormProps = {
     name: formData.get("name") as string,
     description: formData.get("description") as string,
     durationMinutes: Number(formData.get("durationMinutes")),
@@ -23,10 +35,10 @@ export async function createAppointmentType(
     isActive: Boolean(formData.get("isActive")),
   };
 
-  const parsed = createAppointmentTypeSchema.safeParse(rawData);
+  const parsed = appointmentTypeFormSchema.safeParse(rawData);
 
   if (!parsed.success) {
-    console.error("parsing error:", parsed.error);
+    console.error("parsing error in createAppointmentType:", parsed.error);
     return {
       status: "error",
       fieldErrors: z.treeifyError(parsed.error).properties,
@@ -57,10 +69,10 @@ export async function createAppointmentType(
 
 export async function updateAppointmentType(
   id: string,
-  prevState: FormState<CreateAppointmentTypeProps>,
+  prevState: FormState<AppointmentTypeFormProps>,
   formData: FormData
-): Promise<FormState<CreateAppointmentTypeProps>> {
-  const rawData: CreateAppointmentTypeProps = {
+): Promise<FormState<AppointmentTypeFormProps>> {
+  const rawData: AppointmentTypeFormProps = {
     name: formData.get("name") as string,
     description: formData.get("description") as string,
     durationMinutes: Number(formData.get("durationMinutes")),
@@ -69,10 +81,10 @@ export async function updateAppointmentType(
     isActive: Boolean(formData.get("isActive")),
   };
 
-  const parsed = createAppointmentTypeSchema.safeParse(rawData);
+  const parsed = appointmentTypeFormSchema.safeParse(rawData);
 
   if (!parsed.success) {
-    console.error("parsing error:", parsed.error);
+    console.error("parsing error in updateAppointmentType:", parsed.error);
     return {
       status: "error",
       fieldErrors: z.treeifyError(parsed.error).properties,
