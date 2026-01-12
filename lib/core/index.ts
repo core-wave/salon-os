@@ -343,7 +343,8 @@ class CLocation {
         .innerJoin(
           appointmentTypes,
           eq(appointments.appointmentTypeId, appointmentTypes.id)
-        );
+        )
+        .where(eq(appointments.locationId, this.data.id));
     } catch (error) {
       console.error("error listing appointments:", error);
       return [];
