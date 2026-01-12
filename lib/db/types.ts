@@ -23,7 +23,7 @@ export type SelectOrganization = Omit<
 
 export type InsertLocation = Omit<
   typeof locations.$inferInsert,
-  "id" | "createdAt" | "organizationId" | "isActive"
+  "id" | "createdAt" | "isActive"
 >;
 
 export type SelectLocation = Omit<
@@ -35,7 +35,7 @@ export type SelectLocation = Omit<
 
 export type InsertOpeningHour = Omit<
   typeof openingHours.$inferInsert,
-  "id" | "createdAt" | "locationId"
+  "id" | "createdAt"
 >;
 
 export type SelectOpeningHour = Omit<
@@ -47,7 +47,7 @@ export type SelectOpeningHour = Omit<
 
 export type InsertOpeningHourException = Omit<
   typeof openingHourExceptions.$inferInsert,
-  "id" | "createdAt" | "locationId"
+  "id" | "createdAt"
 >;
 
 export type SelectOpeningHourException = Omit<
@@ -59,7 +59,7 @@ export type SelectOpeningHourException = Omit<
 
 export type InsertAppointmentType = Omit<
   typeof appointmentTypes.$inferInsert,
-  "id" | "createdAt" | "locationId"
+  "id" | "createdAt"
 >;
 
 export type SelectAppointmentType = Omit<
@@ -71,7 +71,7 @@ export type SelectAppointmentType = Omit<
 
 export type InsertAppointment = Omit<
   typeof appointments.$inferInsert,
-  "id" | "createdAt" | "locationId" | "status"
+  "id" | "createdAt" | "status"
 >;
 
 export type SelectAppointment = Omit<

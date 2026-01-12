@@ -12,10 +12,10 @@ export default async function OverviewPage({
 }) {
   const { organizationSlug, locationSlug } = await params;
 
-  const location = await salonCore.getLocationByFullSlug(
-    organizationSlug,
-    locationSlug
-  );
+  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!organization) notFound();
+
+  const location = await organization.getLocationBySlug(locationSlug);
   if (!location) notFound();
 
   const appointments = await location.listAppointments();

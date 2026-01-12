@@ -42,8 +42,6 @@ export async function createOrganization(
       getPlaceDetails(parsed.data.placeId),
     ]);
 
-    console.log(org, placeDetails);
-
     if (!org || !placeDetails) {
       return {
         status: "error",
@@ -52,9 +50,10 @@ export async function createOrganization(
       };
     }
 
-    const location = await org.createLocation({
+    const location = await salonCore.createLocation({
       name: placeDetails.city,
       slug: slugify(placeDetails.city),
+      organizationId: org.data.id,
       ...placeDetails,
     });
 

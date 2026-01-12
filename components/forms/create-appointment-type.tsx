@@ -108,7 +108,7 @@ export default function CreateAppointmentTypeForm({
                   </TextField>
                 </div>
 
-                <Switch>
+                <Switch name="isActive">
                   {({ isSelected }) => (
                     <>
                       <Switch.Control>

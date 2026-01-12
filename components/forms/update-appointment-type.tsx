@@ -1,6 +1,10 @@
 "use client";
 
-import { createAppointmentType } from "@/lib/appointment-types/functions";
+import {
+  createAppointmentType,
+  updateAppointmentType,
+} from "@/lib/appointment-types/functions";
+import { SelectAppointmentType } from "@/lib/db/types";
 import {
   Button,
   ErrorMessage,
@@ -16,16 +20,27 @@ import {
 import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
-export default function CreateAppointmentTypeForm({
-  locationId,
-}: {
-  locationId: string;
-}) {
-  const formAction = createAppointmentType.bind(null, locationId);
+export default function UpdateAppointmentTypeForm({
+  id,
+  name,
+  currency,
+  description,
+  durationMinutes,
+  isActive,
+  price,
+}: SelectAppointmentType & { locationId: string }) {
+  const formAction = updateAppointmentType.bind(null, id);
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",
-    fieldValues: { currency: "EUR" },
+    fieldValues: {
+      currency: currency,
+      description: description || "",
+      durationMinutes: durationMinutes,
+      isActive: isActive,
+      name: name,
+      price: price,
+    },
   });
 
   const { open, close, isOpen, setOpen } = useOverlayState();
@@ -38,17 +53,16 @@ export default function CreateAppointmentTypeForm({
 
   return (
     <>
-      <Button onPress={open}>
-        <Icon icon={`tabler:plus`} />
-        New Appointment Type
+      <Button onPress={open} isIconOnly variant="ghost">
+        <Icon icon={`tabler:pencil`} />
       </Button>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={setOpen}>
         <Modal.Container>
           <Modal.Dialog>
             <Modal.Header>
-              <Modal.Heading>New Appointment Type</Modal.Heading>
+              <Modal.Heading>Update Appointment Type</Modal.Heading>
               <p className="text-sm leading-5 text-muted">
-                Enter the details for your new appointment type
+                Enter the details to update your appointment type
               </p>
             </Modal.Header>
             <form action={action}>
@@ -108,7 +122,10 @@ export default function CreateAppointmentTypeForm({
                   </TextField>
                 </div>
 
-                <Switch>
+                <Switch
+                  name="isActive"
+                  defaultSelected={state.fieldValues?.isActive}
+                >
                   {({ isSelected }) => (
                     <>
                       <Switch.Control>

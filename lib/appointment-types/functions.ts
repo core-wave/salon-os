@@ -10,6 +10,7 @@ import {
 import { revalidatePath } from "next/cache";
 
 export async function createAppointmentType(
+  locationId: string,
   prevState: FormState<CreateAppointmentTypeProps>,
   formData: FormData
 ): Promise<FormState<CreateAppointmentTypeProps>> {
@@ -19,6 +20,7 @@ export async function createAppointmentType(
     durationMinutes: Number(formData.get("durationMinutes")),
     price: Number(formData.get("price")),
     currency: formData.get("currency") as string,
+    isActive: Boolean(formData.get("isActive")),
   };
 
   const parsed = createAppointmentTypeSchema.safeParse(rawData);
@@ -32,37 +34,59 @@ export async function createAppointmentType(
     };
   }
 
-  const org = await salonCore.getOrganizationBySlug("grote-fok2");
-  if (!org)
-    return {
-      status: "error",
-      fieldValues: parsed.data,
-      formErrors: ["organization does not exist"],
-    };
-
-  const availableLocations = await org.listLocations();
-  if (!availableLocations)
-    return {
-      status: "error",
-      fieldValues: parsed.data,
-      formErrors: ["organization does not have locations"],
-    };
-
-  const location = await org.getLocation(availableLocations[0].id);
-  if (!location)
-    return {
-      status: "error",
-      fieldValues: parsed.data,
-      formErrors: ["location does not exist"],
-    };
-
-  const success = await location.createAppointmentType(parsed.data);
+  const success = await salonCore.createAppointmentType({
+    ...parsed.data,
+    locationId,
+  });
 
   if (!success) {
     return {
       status: "error",
       fieldValues: parsed.data,
       formErrors: ["error creating appointment type"],
+    };
+  }
+
+  revalidatePath("/");
+
+  return {
+    status: "success",
+    fieldValues: parsed.data,
+  };
+}
+
+export async function updateAppointmentType(
+  id: string,
+  prevState: FormState<CreateAppointmentTypeProps>,
+  formData: FormData
+): Promise<FormState<CreateAppointmentTypeProps>> {
+  const rawData: CreateAppointmentTypeProps = {
+    name: formData.get("name") as string,
+    description: formData.get("description") as string,
+    durationMinutes: Number(formData.get("durationMinutes")),
+    price: Number(formData.get("price")),
+    currency: formData.get("currency") as string,
+    isActive: Boolean(formData.get("isActive")),
+  };
+
+  const parsed = createAppointmentTypeSchema.safeParse(rawData);
+
+  if (!parsed.success) {
+    console.error("parsing error:", parsed.error);
+    return {
+      status: "error",
+      fieldErrors: z.treeifyError(parsed.error).properties,
+      fieldValues: rawData,
+    };
+  }
+
+  const success = await salonCore.updateAppointmentType(id, parsed.data);
+
+  if (!success) {
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+      formErrors: ["error updating appointment type"],
     };
   }
 

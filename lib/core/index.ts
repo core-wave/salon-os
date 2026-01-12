@@ -15,6 +15,49 @@ import {
 } from "../db/types";
 
 class Core {
+  public async getOrganizationBySlug(
+    slug: SelectOrganization["slug"]
+  ): Promise<COrganization | null> {
+    try {
+      const res = await auth.api.getFullOrganization({
+        headers: await headers(),
+        query: { organizationSlug: slug },
+      });
+
+      if (!res) return null;
+
+      return new COrganization({
+        id: res.id,
+        createdAt: res.createdAt,
+        name: res.name,
+        slug: res.slug,
+      });
+    } catch (error) {
+      console.error("error getting organization:", error);
+      return null;
+    }
+  }
+
+  public async listOrganizations(): Promise<SelectOrganization[]> {
+    try {
+      const res = await auth.api.listOrganizations({
+        headers: await headers(),
+      });
+
+      return res.map((x) => ({
+        id: x.id,
+        createdAt: x.createdAt,
+        name: x.name,
+        slug: x.slug,
+      }));
+    } catch (error) {
+      console.error("error listing organizations:", error);
+      return [];
+    }
+  }
+
+  // Organizations
+
   public async createOrganization(
     { name, slug }: InsertOrganization,
     userId: string
@@ -39,72 +82,11 @@ class Core {
     }
   }
 
-  //TODO: add update
-
-  //TODO: add delete
-
-  public async getOrganizationBySlug(
-    slug: SelectOrganization["slug"]
-  ): Promise<COrganization | null> {
-    try {
-      const res = await auth.api.getFullOrganization({
-        headers: await headers(),
-        query: { organizationSlug: slug },
-      });
-
-      if (!res) return null;
-
-      return new COrganization({
-        id: res.id,
-        createdAt: res.createdAt,
-        name: res.name,
-        slug: res.slug,
-      });
-    } catch (error) {
-      console.error("error getting organization:", error);
-      return null;
-    }
-  }
-
-  public async getLocationByFullSlug(
-    organizationSlug: SelectOrganization["slug"],
-    locationSlug: SelectLocation["slug"]
-  ): Promise<CLocation | null> {
-    const org = await this.getOrganizationBySlug(organizationSlug);
-    if (!org) return null;
-
-    return await org.getLocationBySlug(locationSlug);
-  }
-
-  public async listAvailableOrganizations(): Promise<SelectOrganization[]> {
-    try {
-      const res = await auth.api.listOrganizations({
-        headers: await headers(),
-      });
-
-      return res.map((x) => ({
-        id: x.id,
-        createdAt: x.createdAt,
-        name: x.name,
-        slug: x.slug,
-      }));
-    } catch (error) {
-      console.error("error listing organizations:", error);
-      return [];
-    }
-  }
-}
-
-class COrganization {
-  constructor(readonly data: SelectOrganization) {}
-
   // Locations
 
   public async createLocation(data: InsertLocation): Promise<boolean> {
     try {
-      const res = await db
-        .insert(locations)
-        .values({ ...data, organizationId: this.data.id });
+      const res = await db.insert(locations).values(data);
 
       return res.count === 1;
     } catch (error) {
@@ -141,45 +123,99 @@ class COrganization {
     }
   }
 
-  public async getLocation(
-    id: SelectLocation["id"]
-  ): Promise<CLocation | null> {
+  // Appointment Types
+
+  public async createAppointmentType(
+    data: InsertAppointmentType
+  ): Promise<boolean> {
     try {
-      const [res] = await db
-        .select()
-        .from(locations)
-        .where(
-          and(eq(locations.organizationId, this.data.id), eq(locations.id, id))
-        )
-        .limit(1);
+      const res = await db.insert(appointmentTypes).values(data);
 
-      if (!res) return null;
-
-      return new CLocation({
-        id: res.id,
-        createdAt: res.createdAt,
-        name: res.name,
-        slug: res.slug,
-        isActive: res.isActive,
-        phone: res.phone,
-        formattedAddress: res.formattedAddress,
-        placeId: res.placeId,
-        googleMapsUri: res.googleMapsUri,
-        streetName: res.streetName,
-        streetNumber: res.streetNumber,
-        postalCode: res.postalCode,
-        city: res.city,
-        administrativeArea: res.administrativeArea,
-        countryCode: res.countryCode,
-        lat: res.lat,
-        lng: res.lng,
-        timeZone: res.timeZone,
-      });
+      return res.count === 1;
     } catch (error) {
-      console.error("error getting location:", error);
-      return null;
+      console.error("error creating appointment type:", error);
+      return false;
     }
   }
+
+  public async updateAppointmentType(
+    id: SelectAppointmentType["id"],
+    data: Partial<Omit<SelectAppointmentType, "id">>
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .update(appointmentTypes)
+        .set(data)
+        .where(eq(appointmentTypes.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating appointment type:", error);
+      return false;
+    }
+  }
+
+  public async deleteAppointmentType(
+    id: SelectAppointmentType["id"]
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .delete(appointmentTypes)
+        .where(eq(appointmentTypes.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting appointment type:", error);
+      return false;
+    }
+  }
+
+  // Appointments
+
+  public async createAppointment(data: InsertAppointment): Promise<boolean> {
+    try {
+      const res = await db.insert(appointments).values(data);
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating appointment:", error);
+      return false;
+    }
+  }
+
+  public async updateAppointment(
+    id: SelectAppointment["id"],
+    data: Partial<Omit<SelectAppointment, "id">>
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .update(appointments)
+        .set(data)
+        .where(eq(appointments.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating appointment:", error);
+      return false;
+    }
+  }
+
+  public async deleteAppointment(
+    id: SelectAppointment["id"]
+  ): Promise<boolean> {
+    try {
+      const res = await db.delete(appointments).where(eq(appointments.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting appointment:", error);
+      return false;
+    }
+  }
+}
+
+class COrganization {
+  constructor(readonly data: SelectOrganization) {}
 
   public async getLocationBySlug(
     slug: SelectLocation["slug"]
@@ -259,56 +295,7 @@ class COrganization {
 }
 
 class CLocation {
-  constructor(private readonly data: SelectLocation) {}
-
-  // Appointment Types
-
-  public async createAppointmentType(
-    data: InsertAppointmentType
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .insert(appointmentTypes)
-        .values({ ...data, locationId: this.data.id });
-
-      return res.count === 1;
-    } catch (error) {
-      console.error("error creating appointment type:", error);
-      return false;
-    }
-  }
-
-  public async updateAppointmentType(
-    id: SelectAppointmentType["id"],
-    data: Partial<Omit<SelectAppointmentType, "id">>
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .update(appointmentTypes)
-        .set(data)
-        .where(eq(appointmentTypes.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error updating appointment type:", error);
-      return false;
-    }
-  }
-
-  public async deleteAppointmentType(
-    id: SelectAppointmentType["id"]
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .delete(appointmentTypes)
-        .where(eq(appointmentTypes.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error deleting appointment type:", error);
-      return false;
-    }
-  }
+  constructor(readonly data: SelectLocation) {}
 
   public async listAppointmentTypes(): Promise<SelectAppointmentType[]> {
     try {
@@ -328,51 +315,6 @@ class CLocation {
     } catch (error) {
       console.error("error listing appointment types:", error);
       return [];
-    }
-  }
-
-  // Appointments
-
-  public async createAppointment(data: InsertAppointment): Promise<boolean> {
-    try {
-      const res = await db
-        .insert(appointments)
-        .values({ ...data, locationId: this.data.id });
-
-      return res.count === 1;
-    } catch (error) {
-      console.error("error creating appointment:", error);
-      return false;
-    }
-  }
-
-  public async updateAppointment(
-    id: SelectAppointment["id"],
-    data: Partial<Omit<SelectAppointment, "id">>
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .update(appointments)
-        .set(data)
-        .where(eq(appointments.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error updating appointment:", error);
-      return false;
-    }
-  }
-
-  public async deleteAppointment(
-    id: SelectAppointment["id"]
-  ): Promise<boolean> {
-    try {
-      const res = await db.delete(appointments).where(eq(appointments.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error deleting appointment:", error);
-      return false;
     }
   }
 

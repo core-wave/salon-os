@@ -14,6 +14,7 @@ import { Icon } from "@iconify/react";
 import { notFound } from "next/navigation";
 import { Fragment } from "react/jsx-runtime";
 import CreateAppointmentTypeForm from "./form";
+import UpdateAppointmentTypeForm from "@/components/forms/update-appointment-type";
 
 export default async function AppointmentTypesPage({
   params,
@@ -22,10 +23,10 @@ export default async function AppointmentTypesPage({
 }) {
   const { organizationSlug, locationSlug } = await params;
 
-  const location = await salonCore.getLocationByFullSlug(
-    organizationSlug,
-    locationSlug
-  );
+  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!organization) notFound();
+
+  const location = await organization.getLocationBySlug(locationSlug);
   if (!location) notFound();
 
   const appointmentTypes = await location.listAppointmentTypes();
@@ -36,7 +37,7 @@ export default async function AppointmentTypesPage({
         title="Appointment Types"
         description="Manage your services and pricing"
       >
-        <CreateAppointmentTypeForm />
+        <CreateAppointmentTypeForm locationId={location.data.id} />
       </DashboardPageHeader>
 
       <Card className="gap-6">
@@ -62,9 +63,10 @@ export default async function AppointmentTypesPage({
                 {type.isActive ? "Active" : "Inactive"}
               </Chip>
               <div className="flex">
-                <Button isIconOnly variant="ghost">
-                  <Icon icon={`tabler:pencil`} />
-                </Button>
+                <UpdateAppointmentTypeForm
+                  {...type}
+                  locationId={location.data.id}
+                />
                 <DeleteAppointmentType
                   type="Appointment Type"
                   description={`Are you sure you want to delete ${type.name}?`}

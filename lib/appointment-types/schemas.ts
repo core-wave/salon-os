@@ -6,6 +6,7 @@ export const createAppointmentTypeSchema = z.object({
   durationMinutes: z.number("Please enter a valid duration").min(1),
   price: z.number("Please enter a valid price").min(1),
   currency: z.string("Please enter a valid currency").length(3),
+  isActive: z.boolean(),
 });
 
 export type CreateAppointmentTypeProps = z.infer<

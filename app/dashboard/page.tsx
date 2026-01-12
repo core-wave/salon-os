@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const organizations = await salonCore.listAvailableOrganizations();
+  const organizations = await salonCore.listOrganizations();
 
   if (organizations.length === 0) {
     redirect(`/dashboard/new-organization`);
