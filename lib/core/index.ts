@@ -1,7 +1,12 @@
 import { headers } from "next/headers";
 import { auth } from "../auth";
 import { db } from "../db";
-import { locations, appointmentTypes, appointments } from "../db/schema";
+import {
+  locations,
+  appointmentTypes,
+  appointments,
+  openingHours,
+} from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import {
   InsertAppointment,
@@ -11,6 +16,7 @@ import {
   SelectAppointment,
   SelectAppointmentType,
   SelectLocation,
+  SelectOpeningHour,
   SelectOrganization,
 } from "../db/types";
 
@@ -314,6 +320,24 @@ class CLocation {
         .where(eq(appointmentTypes.locationId, this.data.id));
     } catch (error) {
       console.error("error listing appointment types:", error);
+      return [];
+    }
+  }
+
+  public async listRegularOpeningHours(): Promise<SelectOpeningHour[]> {
+    try {
+      return await db
+        .select({
+          id: openingHours.id,
+          dayOfWeek: openingHours.dayOfWeek,
+          isClosed: openingHours.isClosed,
+          opensAt: openingHours.opensAt,
+          closesAt: openingHours.closesAt,
+        })
+        .from(openingHours)
+        .where(eq(openingHours.locationId, this.data.id));
+    } catch (error) {
+      console.error("error listing appointments:", error);
       return [];
     }
   }

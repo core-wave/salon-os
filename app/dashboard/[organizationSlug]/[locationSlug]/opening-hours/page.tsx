@@ -1,11 +1,9 @@
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
-import { Button, Card, Chip, Label, Separator } from "@heroui/react";
-import { Icon } from "@iconify/react";
-import {
-  mockOpeningHours,
-  mockOpeningHoursExceptions,
-} from "@/lib/mockdata/opening-hours";
+import { Card, Chip, Label, Separator } from "@heroui/react";
+import { mockOpeningHoursExceptions } from "@/lib/mockdata/opening-hours";
 import { Fragment } from "react/jsx-runtime";
+import { salonCore } from "@/lib/core";
+import { notFound } from "next/navigation";
 
 const DAY_LABELS = {
   0: "Sunday",
@@ -17,7 +15,21 @@ const DAY_LABELS = {
   6: "Saturday",
 } as const;
 
-export default function OpeningHoursPage() {
+export default async function OpeningHoursPage({
+  params,
+}: {
+  params: Promise<{ organizationSlug: string; locationSlug: string }>;
+}) {
+  const { organizationSlug, locationSlug } = await params;
+
+  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!organization) notFound();
+
+  const location = await organization.getLocationBySlug(locationSlug);
+  if (!location) notFound();
+
+  const regularOpeningHours = await location.listRegularOpeningHours();
+
   return (
     <>
       <DashboardPageHeader
@@ -35,22 +47,14 @@ export default function OpeningHoursPage() {
           <Label className="font-semibold">Opening Hours</Label>
 
           {/* Rows */}
-          {mockOpeningHours.map((day) => (
+          {regularOpeningHours.map((day) => (
             <Fragment key={day.dayOfWeek}>
               <Separator className="col-span-3" />
               {/* Day */}
-              <Label className="font-normal">{DAY_LABELS[day.dayOfWeek]}</Label>
+              {/* <Label className="font-normal">{DAY_LABELS[day.dayOfWeek]}</Label> */}
 
               {/* Status */}
-              {day.isOpen ? (
-                <Chip
-                  className="justify-self-start w-fit"
-                  color="success"
-                  variant="soft"
-                >
-                  Open
-                </Chip>
-              ) : (
+              {day.isClosed ? (
                 <Chip
                   className="justify-self-start w-fit"
                   color="default"
@@ -58,18 +62,24 @@ export default function OpeningHoursPage() {
                 >
                   Closed
                 </Chip>
+              ) : (
+                <Chip
+                  className="justify-self-start w-fit"
+                  color="success"
+                  variant="soft"
+                >
+                  Open
+                </Chip>
               )}
 
               {/* Hours */}
               <div className="flex gap-2 flex-wrap">
-                {day.isOpen && day.hours.length > 0 ? (
-                  day.hours.map((slot, idx) => (
-                    <Chip key={idx} color="accent" variant="soft">
-                      {slot.start}–{slot.end}
-                    </Chip>
-                  ))
-                ) : (
+                {day.isClosed ? (
                   <Label className="text-muted">—</Label>
+                ) : (
+                  <Chip color="accent" variant="soft">
+                    {day.opensAt}–{day.closesAt}
+                  </Chip>
                 )}
               </div>
             </Fragment>
