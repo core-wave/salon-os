@@ -51,7 +51,7 @@ export default async function AppointmentTypesPage({
                 {type.price} {type.currency}
               </Label>
               <Chip
-                color={type.isActive ? "success" : "default"}
+                color={type.isActive ? "accent" : "default"}
                 variant={type.isActive ? "soft" : "soft"}
                 className="justify-self-start"
               >

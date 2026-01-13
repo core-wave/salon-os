@@ -40,7 +40,7 @@ export default async function AppointmentsPage({
       </DashboardPageHeader>
 
       <div className="flex gap-4 items-center">
-        <ButtonGroup variant="secondary">
+        <ButtonGroup variant="tertiary">
           <Button isIconOnly>
             <Icon icon={`tabler:chevron-left`} />
           </Button>
