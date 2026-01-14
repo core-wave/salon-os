@@ -88,8 +88,8 @@ export default async function OpeningHoursPage({
                   <Label className="text-muted">—</Label>
                 ) : (
                   day.slots.map((slot, idx) => (
-                    <Chip key={idx} color="default" variant="soft">
-                      {slot.opensAt}–{slot.closesAt}
+                    <Chip key={idx} color="accent" variant="soft">
+                      {slot.opensAt.slice(0, 5)}–{slot.closesAt.slice(0, 5)}
                     </Chip>
                   ))
                 )}

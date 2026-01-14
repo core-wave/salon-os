@@ -32,17 +32,14 @@ export async function updateOpeningHours(
 
   const location = await salonCore.getLocation(locationId);
   if (!location) {
-    console.log("location not found");
+    console.log("location error");
     return { status: "error" };
   }
 
-  if (prevState.fieldValues?.slots && prevState.fieldValues.slots.length > 0) {
-    console.log(slots);
-    const deleteSuccess = await location.deleteOpeningHours(dayOfWeek);
-    if (!deleteSuccess) {
-      console.log("delete error");
-      return { status: "error" };
-    }
+  const deleteSuccess = await location.deleteOpeningHours(dayOfWeek);
+  if (!deleteSuccess) {
+    console.log("delete error");
+    return { status: "error" };
   }
 
   if (parsed.data?.slots.length > 0) {
@@ -56,11 +53,15 @@ export async function updateOpeningHours(
     }
   }
 
-  // validate here (no overlaps, opens < closes)
-
-  //   await replaceOpeningHoursForDay(locationId, dayOfWeek, slots);
-
   revalidatePath("/");
 
-  return { status: "success" };
+  return {
+    status: "success",
+    fieldValues: {
+      slots: parsed.data.slots.map((slot) => ({
+        opensAt: slot.opensAt,
+        closesAt: slot.closesAt,
+      })),
+    },
+  };
 }

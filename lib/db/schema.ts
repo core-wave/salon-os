@@ -73,10 +73,7 @@ export const openingHours = pgTable(
     opensAt: time("opens_at").notNull(),
     closesAt: time("closes_at").notNull(),
   },
-  (t) => [
-    index("opening_hours_location_idx").on(t.locationId),
-    uniqueIndex("opening_hours_unique").on(t.locationId, t.dayOfWeek),
-  ]
+  (t) => [index("opening_hours_location_idx").on(t.locationId)]
 );
 
 export const openingHourExceptions = pgTable(

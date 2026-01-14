@@ -1,0 +1,1 @@
+DROP INDEX "opening_hours_unique";
