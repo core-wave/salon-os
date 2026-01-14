@@ -75,7 +75,7 @@ export default async function OpeningHoursPage({
                 </Chip>
               ) : (
                 <Chip
-                  color="success"
+                  color="accent"
                   variant="soft"
                   className="justify-self-start"
                 >

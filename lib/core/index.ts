@@ -7,7 +7,7 @@ import {
   appointments,
   openingHours,
 } from "../db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, asc, desc } from "drizzle-orm";
 import {
   InsertAppointment,
   InsertAppointmentType,
@@ -351,7 +351,8 @@ class CLocation {
           isActive: appointmentTypes.isActive,
         })
         .from(appointmentTypes)
-        .where(eq(appointmentTypes.locationId, this.data.id));
+        .where(eq(appointmentTypes.locationId, this.data.id))
+        .orderBy(desc(appointmentTypes.isActive), asc(appointmentTypes.name));
     } catch (error) {
       console.error("error listing appointment types:", error);
       return [];
