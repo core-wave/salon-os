@@ -57,6 +57,10 @@ export default function UpdateOpeningHoursForm({
     setSlotsState((prev) => [...prev, { opensAt: "09:00", closesAt: "17:00" }]);
   };
 
+  const clearSlots = () => {
+    setSlotsState([]);
+  };
+
   const removeSlot = (index: number) => {
     setSlotsState((prev) => prev.filter((_, i) => i !== index));
   };
@@ -76,6 +80,10 @@ export default function UpdateOpeningHoursForm({
 
             <form action={action}>
               <Modal.Body className="flex flex-col gap-4">
+                <p className="text-sm text-muted">
+                  Add one or more time ranges for this day. Leaving it empty
+                  will mark the day as closed.
+                </p>
                 {slotsState.length > 0 ? (
                   slotsState.map((slot, idx) => (
                     <div key={idx} className="flex gap-2 items-end">
@@ -85,6 +93,7 @@ export default function UpdateOpeningHoursForm({
                           type="time"
                           name={`slots.${idx}.opensAt`}
                           defaultValue={slot.opensAt}
+                          required
                         />
                       </div>
 
@@ -94,10 +103,12 @@ export default function UpdateOpeningHoursForm({
                           type="time"
                           name={`slots.${idx}.closesAt`}
                           defaultValue={slot.closesAt}
+                          required
                         />
                       </div>
 
                       <Button
+                        type="button"
                         variant="danger"
                         onPress={() => removeSlot(idx)}
                         isIconOnly
@@ -110,10 +121,26 @@ export default function UpdateOpeningHoursForm({
                   <Label className="text-muted">Closed all day</Label>
                 )}
 
-                <Button type="button" variant="ghost" onPress={addSlot}>
-                  <Icon icon="tabler:plus" />
-                  Add slot
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onPress={addSlot}
+                    isDisabled={isLoading}
+                  >
+                    <Icon icon="tabler:plus" />
+                    Add slot
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onPress={clearSlots}
+                    isDisabled={isLoading || slotsState.length === 0}
+                  >
+                    <Icon icon="tabler:circle-minus" />
+                    Clear slots
+                  </Button>
+                </div>
 
                 {/* Used by the server to know how many slots to read */}
                 <input
@@ -124,10 +151,10 @@ export default function UpdateOpeningHoursForm({
               </Modal.Body>
 
               <Modal.Footer>
-                <Button variant="secondary" onPress={close}>
+                <Button type="button" variant="secondary" onPress={close}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" isDisabled={isLoading}>
                   {isLoading ? (
                     <Spinner size="sm" />
                   ) : (
