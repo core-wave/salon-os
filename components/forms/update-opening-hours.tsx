@@ -2,13 +2,16 @@
 
 import { SelectOpeningHour } from "@/lib/db/types";
 import { updateOpeningHours } from "@/lib/opening-hours/functions";
+import { timeStringToTime } from "@/lib/utils";
 import {
   Button,
   Label,
   Modal,
   Spinner,
-  Input,
   useOverlayState,
+  TimeField,
+  DateInputGroup,
+  TimeValue,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useActionState, useEffect, useState } from "react";
@@ -17,6 +20,8 @@ type Slot = {
   opensAt: string;
   closesAt: string;
 };
+
+type Test = TimeValue;
 
 export default function UpdateOpeningHoursForm({
   locationId,
@@ -51,14 +56,10 @@ export default function UpdateOpeningHoursForm({
     if (state.status === "success") {
       close();
     }
-  }, [state.status]);
+  }, [state]);
 
   const addSlot = () => {
     setSlotsState((prev) => [...prev, { opensAt: "09:00", closesAt: "17:00" }]);
-  };
-
-  const clearSlots = () => {
-    setSlotsState([]);
   };
 
   const removeSlot = (index: number) => {
@@ -79,37 +80,49 @@ export default function UpdateOpeningHoursForm({
             </Modal.Header>
 
             <form action={action}>
-              <Modal.Body className="flex flex-col gap-4">
+              <Modal.Body className="flex flex-col gap-4 overflow-visible">
                 <p className="text-sm text-muted">
                   Add one or more time ranges for this day. Leaving it empty
                   will mark the day as closed.
                 </p>
+
                 {slotsState.length > 0 ? (
                   slotsState.map((slot, idx) => (
-                    <div key={idx} className="flex gap-2 items-end">
-                      <div>
+                    <div
+                      key={idx}
+                      className="w-full grid grid-cols-[1fr_1fr_auto] gap-2 items-end"
+                    >
+                      <TimeField
+                        className="w-full"
+                        name={`slots.${idx}.opensAt`}
+                        defaultValue={timeStringToTime(slot.opensAt)}
+                      >
                         <Label>Opens</Label>
-                        <Input
-                          type="time"
-                          name={`slots.${idx}.opensAt`}
-                          defaultValue={slot.opensAt}
-                          required
-                        />
-                      </div>
-
-                      <div>
+                        <DateInputGroup>
+                          <DateInputGroup.Input>
+                            {(segment) => (
+                              <DateInputGroup.Segment segment={segment} />
+                            )}
+                          </DateInputGroup.Input>
+                        </DateInputGroup>
+                      </TimeField>
+                      <TimeField
+                        className="w-full"
+                        name={`slots.${idx}.closesAt`}
+                        defaultValue={timeStringToTime(slot.closesAt)}
+                      >
                         <Label>Closes</Label>
-                        <Input
-                          type="time"
-                          name={`slots.${idx}.closesAt`}
-                          defaultValue={slot.closesAt}
-                          required
-                        />
-                      </div>
-
+                        <DateInputGroup>
+                          <DateInputGroup.Input>
+                            {(segment) => (
+                              <DateInputGroup.Segment segment={segment} />
+                            )}
+                          </DateInputGroup.Input>
+                        </DateInputGroup>
+                      </TimeField>
                       <Button
                         type="button"
-                        variant="danger"
+                        variant="danger-soft"
                         onPress={() => removeSlot(idx)}
                         isIconOnly
                       >
@@ -121,26 +134,15 @@ export default function UpdateOpeningHoursForm({
                   <Label className="text-muted">Closed all day</Label>
                 )}
 
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onPress={addSlot}
-                    isDisabled={isLoading}
-                  >
-                    <Icon icon="tabler:plus" />
-                    Add slot
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onPress={clearSlots}
-                    isDisabled={isLoading || slotsState.length === 0}
-                  >
-                    <Icon icon="tabler:circle-minus" />
-                    Clear slots
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onPress={addSlot}
+                  isDisabled={isLoading}
+                >
+                  <Icon icon="tabler:plus" />
+                  Add slot
+                </Button>
 
                 {/* Used by the server to know how many slots to read */}
                 <input

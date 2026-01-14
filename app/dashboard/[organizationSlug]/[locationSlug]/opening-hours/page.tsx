@@ -89,7 +89,7 @@ export default async function OpeningHoursPage({
                 ) : (
                   day.slots.map((slot, idx) => (
                     <Chip key={idx} color="accent" variant="soft">
-                      {slot.opensAt}–{slot.closesAt}
+                      {slot.opensAt.slice(0, 5)}–{slot.closesAt.slice(0, 5)}
                     </Chip>
                   ))
                 )}

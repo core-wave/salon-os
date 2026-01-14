@@ -57,6 +57,13 @@
       "when": 1768254084589,
       "tag": "0007_wise_william_stryker",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1768394122022,
+      "tag": "0008_tricky_newton_destine",
+      "breakpoints": true
     }
   ]
 }

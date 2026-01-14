@@ -386,7 +386,7 @@ class CLocation {
           )
         );
 
-      return res.count > 0;
+      return true;
     } catch (error) {
       console.error("error deleting opening hours:", error);
       return false;
@@ -406,7 +406,7 @@ class CLocation {
     try {
       const res = await db.insert(openingHours).values(data);
 
-      return res.count === 1;
+      return true;
     } catch (error) {
       console.error("error creating opening hours:", error);
       return false;
