@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Button,
   buttonVariants,
   cn,
   Label,
@@ -80,6 +81,15 @@ export default function Sidebar({ slug }: { slug: string }) {
 
   return (
     <aside className="bg-surface w-70 shrink-0 p-4 flex flex-col gap-6 border-r border-separator">
+      <div className="flex gap-2 items-center">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-3xl bg-accent-soft text-accent-soft-foreground">
+          <Icon icon={`tabler:building-store`} className="size-6" />
+        </div>
+        <div className="flex flex-1 flex-col">
+          <p className="text-sm font-semibold">Hairline</p>
+          <p className="text-xs text-muted">Urk</p>
+        </div>
+      </div>
       <ScrollShadow className="flex-1 flex flex-col gap-6">
         {sidebarCategories.map((cat, idx) => (
           <div key={idx} className="flex flex-col">
