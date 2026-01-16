@@ -68,9 +68,15 @@ const sidebarCategories: SidebarCategory[] = [
   },
 ];
 
-export default function Sidebar({ slug }: { slug: string }) {
+export default function Sidebar() {
   const pathname = usePathname();
-  const selectedPath = pathname.split("/")[4] || "overview";
+
+  console.log(pathname);
+
+  const [, , organizationSlug, locationSlug, selectedPath] =
+    pathname.split("/");
+
+  const slug = `${organizationSlug}/${locationSlug}`;
 
   return (
     <aside className="bg-surface w-70 shrink-0 flex flex-col border-r border-separator">
@@ -89,7 +95,9 @@ export default function Sidebar({ slug }: { slug: string }) {
               </Label>
             )}
             {cat.items.map((item) => {
-              const isActive = selectedPath === item.slug;
+              const isActive = selectedPath
+                ? selectedPath === item.slug
+                : "overview" === item.slug;
 
               return (
                 <Link

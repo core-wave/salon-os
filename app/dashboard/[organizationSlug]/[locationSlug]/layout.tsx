@@ -1,9 +1,19 @@
+import FeedbackForm from "@/components/forms/feedback";
 import LogoutForm from "@/components/forms/logout";
 import Sidebar from "@/components/layout/sidebar";
 import { auth } from "@/lib/auth";
 import { logout } from "@/lib/auth/functions";
+import { salonCore } from "@/lib/core";
 import { getInitials } from "@/lib/utils";
-import { Avatar, Dropdown, Label, ScrollShadow } from "@heroui/react";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Label,
+  ScrollShadow,
+  Separator,
+} from "@heroui/react";
+import { Icon } from "@iconify/react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
@@ -17,7 +27,11 @@ export default async function DashboardLayout({
 }) {
   const { organizationSlug, locationSlug } = await params;
 
-  const slug = `${organizationSlug}/${locationSlug}`;
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!org) notFound();
+
+  const loc = await org.getLocationBySlug(locationSlug);
+  if (!loc) notFound();
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -29,10 +43,18 @@ export default async function DashboardLayout({
 
   return (
     <div className="max-h-dvh flex w-full overflow-hidden">
-      <Sidebar slug={slug} />
+      <Sidebar />
       <div className="w-full min-h-full flex flex-col">
-        <div className="flex h-14 border-b border-separator bg-surface p-4 items-center">
+        <div className="flex h-14 border-b border-separator bg-surface p-4 items-center gap-2">
           <div className="flex-1"></div>
+          <div className="flex">
+            <FeedbackForm organization={org.data} user={user} />
+            <Button variant="ghost" isIconOnly>
+              <Icon icon={`tabler:bell`} />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="mr-3" />
           <Dropdown>
             <Dropdown.Trigger className="rounded-full">
               <Avatar variant="soft">

@@ -5,7 +5,7 @@ export const serverSchema = z.object({
   RESEND_API_KEY: z.string(),
   BETTER_AUTH_URL: z.url(),
   GOOGLE_PLACES_API_KEY: z.string(),
-  GRAVATAR_API_KEY: z.string(),
+  DISCORD_FEEDBACK_WEBHOOK_URL: z.url(),
 });
 
 export const clientSchema = z.object({
