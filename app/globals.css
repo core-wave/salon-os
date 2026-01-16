@@ -6,3 +6,14 @@
   --radius: 0.25rem;
   --field-radius: calc(var(--radius) * 3);
 }
+
+@theme {
+  --background-image-hero-section-centered-navbar: linear-gradient(
+    137deg,
+    #f4f4f5 34.15%,
+    #f8e5ec 46.96%,
+    #fdd0df 63.99%,
+    #e4d4f4 75.82%,
+    #a9eaf0 98.9%
+  );
+}
