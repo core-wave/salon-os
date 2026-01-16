@@ -45,7 +45,7 @@ export default function CreateAppointmentTypeForm({
     <>
       <Button onPress={open}>
         <Icon icon={`tabler:plus`} />
-        New Appointment
+        New Appointment Type
       </Button>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={setOpen}>
         <Modal.Container>

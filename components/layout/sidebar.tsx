@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  buttonVariants,
-  cn,
-  Label,
-  ScrollShadow,
-  Separator,
-} from "@heroui/react";
+import { Button, buttonVariants, cn, Label, ScrollShadow } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -128,7 +122,10 @@ export default function Sidebar() {
           </div>
         ))}
       </ScrollShadow>
-      <div className="p-4 border-t border-separator">
+      <div className="p-4 border-t border-separator flex flex-col gap-2">
+        <Button variant="secondary" className="bg-accent-soft" fullWidth>
+          Upgrade Plan <Icon icon={`tabler:rocket`} />
+        </Button>
         <p className="text-center text-xs text-muted font-medium">
           Powered by salonOS
         </p>

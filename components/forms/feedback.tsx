@@ -38,16 +38,13 @@ export default function FeedbackForm({
   return (
     <Modal>
       <Button variant="ghost" onPress={open} isIconOnly>
-        <Icon icon={`tabler:inbox`} />
+        <Icon icon={`tabler:flag`} />
       </Button>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={setOpen}>
         <Modal.Container>
           <Modal.Dialog>
             <Modal.CloseTrigger />
             <Modal.Header>
-              <Modal.Icon className="bg-default text-foreground">
-                <Icon icon={`tabler:inbox`} className="size-5" />
-              </Modal.Icon>
               <Modal.Heading>Help us improve SalonOS</Modal.Heading>
             </Modal.Header>
             <form action={action}>

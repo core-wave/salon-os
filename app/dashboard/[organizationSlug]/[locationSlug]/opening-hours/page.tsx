@@ -75,7 +75,7 @@ export default async function OpeningHoursPage({
                 </Chip>
               ) : (
                 <Chip
-                  color="accent"
+                  color="success"
                   variant="soft"
                   className="justify-self-start"
                 >
@@ -88,7 +88,7 @@ export default async function OpeningHoursPage({
                   <Label className="text-muted">—</Label>
                 ) : (
                   day.slots.map((slot, idx) => (
-                    <Chip key={idx} color="accent" variant="soft">
+                    <Chip key={idx} variant="soft">
                       {slot.opensAt.slice(0, 5)}–{slot.closesAt.slice(0, 5)}
                     </Chip>
                   ))
