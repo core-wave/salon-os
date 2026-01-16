@@ -16,11 +16,9 @@ import {
   Label,
   InputGroup,
   SearchField,
-  Dropdown,
   ListBox,
   ListBoxItem,
-  cn,
-  cardVariants,
+  ComboBox,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useActionState, useEffect, useRef, useState } from "react";
@@ -90,7 +88,7 @@ export default function CreateOrganizationForm() {
 
   return (
     <form action={action} className="w-full max-w-sm flex flex-col gap-6">
-      <Fieldset>
+      <Fieldset className="gap-4">
         <Fieldset.Legend>Create your SalonOS organization</Fieldset.Legend>
         <Description>What should we name your business?</Description>
 
@@ -130,22 +128,28 @@ export default function CreateOrganizationForm() {
           )}
         </TextField>
 
-        <SearchField
-          name="addressText"
-          value={addressQuery}
-          onChange={setAddressQuery}
+        <ComboBox
+          defaultFilter={(text, inputValue) => {
+            return true;
+          }}
         >
           <Label>Address</Label>
-          <SearchField.Group>
-            <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search your address" />
-            <SearchField.ClearButton />
-          </SearchField.Group>
-          {suggestions.length > 0 && (
-            <ListBox className="bg-surface rounded-3xl shadow-sm text-sm text-muted">
+          <ComboBox.InputGroup>
+            <Input
+              placeholder="Search your address"
+              name="addressText"
+              value={addressQuery}
+              onChange={(v) => setAddressQuery(v.target.value)}
+            />
+            <ComboBox.Trigger />
+          </ComboBox.InputGroup>
+          <ComboBox.Popover>
+            <ListBox>
               {suggestions.map((s) => (
-                <ListBoxItem
+                <ListBox.Item
                   key={s.placeId}
+                  id={s.placeId}
+                  textValue={s.text.text}
                   onAction={() => {
                     suppressNextSearch.current = true;
                     setAddressQuery(s.text.text);
@@ -154,11 +158,12 @@ export default function CreateOrganizationForm() {
                   }}
                 >
                   {s.text.text}
-                </ListBoxItem>
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
               ))}
             </ListBox>
-          )}
-        </SearchField>
+          </ComboBox.Popover>
+        </ComboBox>
 
         <Input hidden name="userId" defaultValue={session?.user.id} />
         <Input

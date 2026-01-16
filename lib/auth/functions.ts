@@ -101,3 +101,13 @@ export async function login(
 
   redirect("/dashboard");
 }
+
+export async function logout(): Promise<boolean> {
+  try {
+    await auth.api.signOut();
+  } catch (error) {
+    return false;
+  }
+
+  redirect("/");
+}
