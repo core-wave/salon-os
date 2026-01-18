@@ -6,9 +6,11 @@ import {
   appointmentTypes,
   appointments,
   openingHours,
+  openingHourExceptions,
+  openingHourExceptionSlots,
   customers,
 } from "../db/schema";
-import { and, eq, asc, desc } from "drizzle-orm";
+import { and, eq, asc, desc, inArray } from "drizzle-orm";
 import {
   InsertAppointment,
   InsertAppointmentType,
@@ -19,6 +21,8 @@ import {
   SelectCustomer,
   SelectLocation,
   SelectOpeningHour,
+  SelectOpeningHourException,
+  SelectOpeningHourExceptionSlot,
   SelectOrganization,
 } from "../db/types";
 
@@ -432,6 +436,137 @@ class CLocation {
       return true;
     } catch (error) {
       console.error("error creating opening hours:", error);
+      return false;
+    }
+  }
+
+  public async listOpeningHourExceptions(): Promise<
+    (SelectOpeningHourException & {
+      slots: SelectOpeningHourExceptionSlot[];
+    })[]
+  > {
+    try {
+      const exceptions = await db
+        .select({
+          id: openingHourExceptions.id,
+          date: openingHourExceptions.date,
+          isClosed: openingHourExceptions.isClosed,
+          remark: openingHourExceptions.remark,
+        })
+        .from(openingHourExceptions)
+        .where(eq(openingHourExceptions.locationId, this.data.id))
+        .orderBy(asc(openingHourExceptions.date));
+
+      if (exceptions.length === 0) {
+        return [];
+      }
+
+      const exceptionIds = exceptions.map((exception) => exception.id);
+
+      const slots = await db
+        .select({
+          id: openingHourExceptionSlots.id,
+          exceptionId: openingHourExceptionSlots.exceptionId,
+          opensAt: openingHourExceptionSlots.opensAt,
+          closesAt: openingHourExceptionSlots.closesAt,
+        })
+        .from(openingHourExceptionSlots)
+        .where(inArray(openingHourExceptionSlots.exceptionId, exceptionIds))
+        .orderBy(asc(openingHourExceptionSlots.opensAt));
+
+      return exceptions.map((exception) => ({
+        ...exception,
+        slots: slots
+          .filter((slot) => slot.exceptionId === exception.id)
+          .map(({ exceptionId: _exceptionId, ...slot }) => slot),
+      }));
+    } catch (error) {
+      console.error("error listing opening hour exceptions:", error);
+      return [];
+    }
+  }
+
+  public async upsertOpeningHourException(input: {
+    date: string;
+    isClosed: boolean;
+    remark?: string | null;
+    slots: { opensAt: string; closesAt: string }[];
+  }): Promise<boolean> {
+    try {
+      const [existing] = await db
+        .select({ id: openingHourExceptions.id })
+        .from(openingHourExceptions)
+        .where(
+          and(
+            eq(openingHourExceptions.locationId, this.data.id),
+            eq(openingHourExceptions.date, input.date)
+          )
+        )
+        .limit(1);
+
+      let exceptionId = existing?.id;
+
+      if (!exceptionId) {
+        const [created] = await db
+          .insert(openingHourExceptions)
+          .values({
+            locationId: this.data.id,
+            date: input.date,
+            isClosed: input.isClosed,
+            remark: input.remark ?? null,
+          })
+          .returning({ id: openingHourExceptions.id });
+
+        exceptionId = created?.id;
+      } else {
+        await db
+          .update(openingHourExceptions)
+          .set({
+            isClosed: input.isClosed,
+            remark: input.remark ?? null,
+          })
+          .where(eq(openingHourExceptions.id, exceptionId));
+      }
+
+      if (!exceptionId) {
+        return false;
+      }
+
+      await db
+        .delete(openingHourExceptionSlots)
+        .where(eq(openingHourExceptionSlots.exceptionId, exceptionId));
+
+      if (!input.isClosed && input.slots.length > 0) {
+        await db.insert(openingHourExceptionSlots).values(
+          input.slots.map((slot) => ({
+            exceptionId,
+            opensAt: slot.opensAt,
+            closesAt: slot.closesAt,
+          }))
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error("error upserting opening hour exception:", error);
+      return false;
+    }
+  }
+
+  public async deleteOpeningHourException(date: string): Promise<boolean> {
+    try {
+      await db
+        .delete(openingHourExceptions)
+        .where(
+          and(
+            eq(openingHourExceptions.locationId, this.data.id),
+            eq(openingHourExceptions.date, date)
+          )
+        );
+
+      return true;
+    } catch (error) {
+      console.error("error deleting opening hour exception:", error);
       return false;
     }
   }
