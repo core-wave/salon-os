@@ -1,7 +1,9 @@
 import {
   appointments,
   appointmentTypes,
+  customers,
   locations,
+  member,
   openingHourExceptions,
   openingHours,
   organization,
@@ -80,3 +82,10 @@ export type SelectAppointment = Omit<
 > & {
   appointmentType: SelectAppointmentType;
 };
+
+// Customers
+
+export type SelectCustomer = Omit<
+  typeof customers.$inferSelect,
+  "organizationId"
+>;

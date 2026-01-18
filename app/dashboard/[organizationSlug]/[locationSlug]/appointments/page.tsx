@@ -11,6 +11,7 @@ import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
 import AppointmentRow from "@/components/appointment-row";
 import { notFound } from "next/navigation";
+import CreateAppointmentForm from "@/components/forms/create-appointment";
 
 export default async function AppointmentsPage({
   params,
@@ -25,7 +26,11 @@ export default async function AppointmentsPage({
   const location = await organization.getLocationBySlug(locationSlug);
   if (!location) notFound();
 
-  const appointments = await location.listAppointments();
+  const [appointments, appointmentTypes, customers] = await Promise.all([
+    location.listAppointments(),
+    location.listAppointmentTypes(),
+    organization.listCustomers(),
+  ]);
 
   return (
     <>
@@ -33,10 +38,12 @@ export default async function AppointmentsPage({
         title="Appointments"
         description="Manage and schedule appointments"
       >
-        <Button>
-          <Icon icon={`tabler:plus`} />
-          New Appointment
-        </Button>
+        <CreateAppointmentForm
+          appointmentTypes={appointmentTypes}
+          currency="EUR"
+          locationId={location.data.id}
+          customers={customers}
+        />
       </DashboardPageHeader>
 
       <div className="flex gap-4 items-center">

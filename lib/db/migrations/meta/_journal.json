@@ -64,6 +64,27 @@
       "when": 1768394122022,
       "tag": "0008_tricky_newton_destine",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1768741465839,
+      "tag": "0009_nosy_kabuki",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1768762874261,
+      "tag": "0010_unusual_virginia_dare",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1768762889920,
+      "tag": "0011_real_moon_knight",
+      "breakpoints": true
     }
   ]
 }

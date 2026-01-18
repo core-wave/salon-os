@@ -6,6 +6,7 @@ import {
   appointmentTypes,
   appointments,
   openingHours,
+  customers,
 } from "../db/schema";
 import { and, eq, asc, desc } from "drizzle-orm";
 import {
@@ -15,6 +16,7 @@ import {
   InsertOrganization,
   SelectAppointment,
   SelectAppointmentType,
+  SelectCustomer,
   SelectLocation,
   SelectOpeningHour,
   SelectOrganization,
@@ -329,6 +331,26 @@ class COrganization {
       }));
     } catch (error) {
       console.error("error listing locations:", error);
+      return [];
+    }
+  }
+
+  public async listCustomers(): Promise<SelectCustomer[]> {
+    try {
+      return await db
+        .select({
+          id: customers.id,
+          createdAt: customers.createdAt,
+          userId: customers.userId,
+          name: customers.name,
+          email: customers.email,
+          phone: customers.phone,
+          notes: customers.notes,
+        })
+        .from(customers)
+        .where(eq(customers.organizationId, this.data.id));
+    } catch (error) {
+      console.error("error listing customers:", error);
       return [];
     }
   }

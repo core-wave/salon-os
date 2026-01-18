@@ -20,6 +20,7 @@ export * from "./enums";
 
 import { organization, user } from "./auth";
 import { appointmentStatusEnum } from "./enums";
+import { isNotNull } from "drizzle-orm";
 
 export const locations = pgTable(
   "locations",
@@ -133,9 +134,9 @@ export const appointments = pgTable(
       .notNull()
       .references(() => locations.id),
 
-    customerId: text("customer_id")
+    customerId: uuid("customer_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => customers.id),
 
     appointmentTypeId: uuid("appointment_type_id")
       .notNull()
@@ -153,5 +154,40 @@ export const appointments = pgTable(
     index("appointment_user_idx").on(t.customerId),
     index("appointment_location_idx").on(t.locationId),
     index("appointment_start_idx").on(t.startsAt),
+  ]
+);
+
+export const customers = pgTable(
+  "customers",
+  {
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
+
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id),
+
+    userId: text("user_id").references(() => user.id),
+
+    name: text("name").notNull(),
+
+    email: text("email").notNull(),
+
+    phone: text("phone"),
+
+    notes: text("notes"),
+  },
+  (table) => [
+    index("customers_org_idx").on(table.organizationId),
+
+    uniqueIndex("customers_org_email_unique")
+      .on(table.organizationId, table.email)
+      .where(isNotNull(table.email)),
+
+    // Phone dedupe per org
+    uniqueIndex("customers_org_phone_unique")
+      .on(table.organizationId, table.phone)
+      .where(isNotNull(table.phone)),
   ]
 );
