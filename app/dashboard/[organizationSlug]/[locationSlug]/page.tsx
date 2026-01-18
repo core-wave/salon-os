@@ -47,7 +47,7 @@ export default async function OverviewPage({
             <Card.Title>Next Appointment</Card.Title>
             <Card.Description>Coming up soon</Card.Description>
           </Card.Header>
-          <Card.Content className="grid grid-cols-[auto_auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+          <Card.Content className="grid grid-cols-[auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
             <AppointmentRow {...nextAppointment} />
           </Card.Content>
         </Card>

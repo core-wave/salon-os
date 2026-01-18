@@ -91,10 +91,9 @@ export default async function AppointmentsPage({
       </div>
 
       <Card className="gap-6">
-        <div className="grid grid-cols-[auto_auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+        <div className="grid grid-cols-[auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
           <Label className="font-semibold">Customer</Label>
           <Label className="font-semibold">Date</Label>
-          <Label className="font-semibold">Time</Label>
           <Label className="font-semibold">Appointment Type</Label>
           <Label className="font-semibold">Status</Label>
           {appointments.map((appt, idx) => (

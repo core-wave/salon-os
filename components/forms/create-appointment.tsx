@@ -3,16 +3,7 @@
 import { createAppointment } from "@/lib/appointments/functions";
 import { SelectAppointmentType, SelectCustomer } from "@/lib/db/types";
 import {
-  dateToCalendarDate,
-  dateToTimeValue,
-  nextQuarterHour,
-} from "@/lib/utils";
-import {
   Button,
-  DateField,
-  DateInputGroup,
-  Input,
-  Key,
   Label,
   ListBox,
   Modal,
@@ -20,11 +11,10 @@ import {
   Spinner,
   TextArea,
   TextField,
-  TimeField,
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect } from "react";
 
 export default function CreateAppointmentForm({
   locationId,

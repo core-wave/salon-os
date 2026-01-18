@@ -1,4 +1,5 @@
 import { SelectAppointment } from "@/lib/db/types";
+import { getInitials } from "@/lib/utils";
 import { Avatar, Chip, Label, Separator } from "@heroui/react";
 
 const statusColorMap: Record<
@@ -13,7 +14,7 @@ const statusColorMap: Record<
 
 export default async function AppointmentRow({
   appointmentType,
-  customerId,
+  customer,
   startsAt,
   status,
 }: SelectAppointment) {
@@ -24,22 +25,35 @@ export default async function AppointmentRow({
       <div className="flex items-center gap-3">
         <Avatar>
           <Avatar.Image
-            alt={customerId}
-            src={`https://tapback.co/api/avatar/${customerId}.webp`}
+            alt={customer.id}
+            src={`https://tapback.co/api/avatar/${customer.id}.webp`}
           />
-          <Avatar.Fallback>JD</Avatar.Fallback>
+          <Avatar.Fallback>{getInitials(customer.name)}</Avatar.Fallback>
         </Avatar>
         <div className="flex flex-col">
-          <Label>{customerId}</Label>
-          <Label className="font-normal text-sm text-muted">{customerId}</Label>
+          <Label>{customer.name}</Label>
+          <Label className="font-normal text-sm text-muted">
+            {customer.email}
+          </Label>
         </div>
       </div>
 
-      <Label className="font-normal">{startsAt.toDateString()}</Label>
+      <Label className="font-normal">
+        {startsAt.toLocaleDateString("en-NL", {
+          day: "2-digit",
+          month: "long",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </Label>
 
-      <Label className="font-normal">{startsAt.toTimeString()}</Label>
-
-      <Label className="font-normal">{appointmentType.name}</Label>
+      <div className="flex flex-col">
+        <Label className="font-normal">{appointmentType.name}</Label>
+        <Label className="text-xs text-muted font-normal">
+          {appointmentType.durationMinutes}min - {appointmentType.price}
+          {appointmentType.currency}
+        </Label>
+      </div>
 
       <Chip
         className="justify-self-start w-fit"

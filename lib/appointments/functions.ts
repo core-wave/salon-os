@@ -5,6 +5,7 @@ import { FormState } from "../types";
 import { AppointmentFormProps, appointmentFormSchema } from "./schemas";
 import { salonCore } from "../core";
 import { revalidatePath } from "next/cache";
+import { nextQuarterHour } from "../utils";
 
 export async function createAppointment(
   locationId: string,
@@ -19,7 +20,7 @@ export async function createAppointment(
   const rawData: AppointmentFormProps = {
     appointmentTypeId: formData.get("appointmentTypeId") as string,
     customerId: formData.get("customerId") as string,
-    startsAt: new Date(formData.get("startAt") as string),
+    startsAt: nextQuarterHour(), // hardcoded, remove later
     notes: formData.get("notes") as string,
   };
 
