@@ -15,3 +15,14 @@ export const openingHoursFormSchema = (slotCount: number) =>
 export type OpeningHoursFormProps = z.infer<
   ReturnType<typeof openingHoursFormSchema>
 >;
+
+export const openingHourExceptionFormSchema = (slotCount: number) =>
+  z.object({
+    date: z.string().min(1, "Please select a date"),
+    remark: z.string().optional(),
+    slots: z.array(openingHourSlotSchema).length(slotCount),
+  });
+
+export type OpeningHourExceptionFormProps = z.infer<
+  ReturnType<typeof openingHourExceptionFormSchema>
+>;

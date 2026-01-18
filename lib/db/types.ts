@@ -5,6 +5,7 @@ import {
   locations,
   member,
   openingHourExceptions,
+  openingHourExceptionSlots,
   openingHours,
   organization,
 } from "./schema";
@@ -55,6 +56,16 @@ export type InsertOpeningHourException = Omit<
 export type SelectOpeningHourException = Omit<
   typeof openingHourExceptions.$inferSelect,
   "locationId"
+>;
+
+export type InsertOpeningHourExceptionSlot = Omit<
+  typeof openingHourExceptionSlots.$inferInsert,
+  "id"
+>;
+
+export type SelectOpeningHourExceptionSlot = Omit<
+  typeof openingHourExceptionSlots.$inferSelect,
+  "exceptionId"
 >;
 
 // Appointment Types

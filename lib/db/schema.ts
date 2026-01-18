@@ -88,9 +88,6 @@ export const openingHourExceptions = pgTable(
 
     date: date("date").notNull(),
 
-    opensAt: time("opens_at"),
-    closesAt: time("closes_at"),
-
     isClosed: boolean("is_closed").notNull().default(true),
 
     remark: varchar("reason", { length: 255 }),
@@ -99,6 +96,21 @@ export const openingHourExceptions = pgTable(
     index("opening_exception_location_idx").on(t.locationId),
     uniqueIndex("opening_exception_unique").on(t.locationId, t.date),
   ]
+);
+
+export const openingHourExceptionSlots = pgTable(
+  "opening_hour_exception_slots",
+  {
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
+
+    exceptionId: uuid("exception_id")
+      .notNull()
+      .references(() => openingHourExceptions.id, { onDelete: "cascade" }),
+
+    opensAt: time("opens_at").notNull(),
+    closesAt: time("closes_at").notNull(),
+  },
+  (t) => [index("opening_exception_slot_exception_idx").on(t.exceptionId)]
 );
 
 export const appointmentTypes = pgTable(
