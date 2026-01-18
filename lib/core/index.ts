@@ -456,12 +456,22 @@ class CLocation {
             currency: appointmentTypes.currency,
             isActive: appointmentTypes.isActive,
           },
+          customer: {
+            id: customers.id,
+            createdAt: customers.createdAt,
+            name: customers.name,
+            email: customers.email,
+            phone: customers.phone,
+            userId: customers.userId,
+            notes: customers.notes,
+          },
         })
         .from(appointments)
         .innerJoin(
           appointmentTypes,
           eq(appointments.appointmentTypeId, appointmentTypes.id)
         )
+        .innerJoin(customers, eq(appointments.customerId, customers.id))
         .where(eq(appointments.locationId, this.data.id));
     } catch (error) {
       console.error("error listing appointments:", error);

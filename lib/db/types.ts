@@ -81,6 +81,7 @@ export type SelectAppointment = Omit<
   "locationId" | "appointmentTypeId"
 > & {
   appointmentType: SelectAppointmentType;
+  customer: SelectCustomer;
 };
 
 // Customers
