@@ -37,9 +37,10 @@ export default async function OpeningHoursPage({
   const openingHoursByDay = Object.keys(DAYS).map((key) => {
     const dayOfWeek = Number(key) as DayOfWeek;
 
-    const slots = regularOpeningHours.filter(
-      (slot) => slot.dayOfWeek === dayOfWeek
+    const day = regularOpeningHours.find(
+      (entry) => entry.dayOfWeek === dayOfWeek
     );
+    const slots = day?.slots ?? [];
 
     return {
       dayOfWeek,

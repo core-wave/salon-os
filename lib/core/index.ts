@@ -6,6 +6,7 @@ import {
   appointmentTypes,
   appointments,
   openingHours,
+  openingHourSlots,
   openingHourExceptions,
   openingHourExceptionSlots,
   customers,
@@ -23,6 +24,7 @@ import {
   SelectOpeningHour,
   SelectOpeningHourException,
   SelectOpeningHourExceptionSlot,
+  SelectOpeningHourSlot,
   SelectOrganization,
 } from "../db/types";
 
@@ -385,17 +387,42 @@ class CLocation {
     }
   }
 
-  public async listRegularOpeningHours(): Promise<SelectOpeningHour[]> {
+  public async listRegularOpeningHours(): Promise<
+    (SelectOpeningHour & { slots: SelectOpeningHourSlot[] })[]
+  > {
     try {
-      return await db
+      const days = await db
         .select({
           id: openingHours.id,
           dayOfWeek: openingHours.dayOfWeek,
-          opensAt: openingHours.opensAt,
-          closesAt: openingHours.closesAt,
         })
         .from(openingHours)
-        .where(eq(openingHours.locationId, this.data.id));
+        .where(eq(openingHours.locationId, this.data.id))
+        .orderBy(asc(openingHours.dayOfWeek));
+
+      if (days.length === 0) {
+        return [];
+      }
+
+      const dayIds = days.map((day) => day.id);
+
+      const slots = await db
+        .select({
+          id: openingHourSlots.id,
+          openingHourId: openingHourSlots.openingHourId,
+          opensAt: openingHourSlots.opensAt,
+          closesAt: openingHourSlots.closesAt,
+        })
+        .from(openingHourSlots)
+        .where(inArray(openingHourSlots.openingHourId, dayIds))
+        .orderBy(asc(openingHourSlots.opensAt));
+
+      return days.map((day) => ({
+        ...day,
+        slots: slots
+          .filter((slot) => slot.openingHourId === day.id)
+          .map(({ openingHourId: _openingHourId, ...slot }) => slot),
+      }));
     } catch (error) {
       console.error("error listing opening hours:", error);
       return [];
@@ -404,7 +431,7 @@ class CLocation {
 
   public async deleteOpeningHours(dayOfWeek: number): Promise<boolean> {
     try {
-      const res = await db
+      await db
         .delete(openingHours)
         .where(
           and(
@@ -424,14 +451,49 @@ class CLocation {
     dayOfWeek: number,
     slots: { opensAt: string; closesAt: string }[]
   ): Promise<boolean> {
-    const data = slots.map((slot) => ({
-      ...slot,
-      dayOfWeek,
-      locationId: this.data.id,
-    }));
-
     try {
-      const res = await db.insert(openingHours).values(data);
+      const [existing] = await db
+        .select({ id: openingHours.id })
+        .from(openingHours)
+        .where(
+          and(
+            eq(openingHours.locationId, this.data.id),
+            eq(openingHours.dayOfWeek, dayOfWeek)
+          )
+        )
+        .limit(1);
+
+      let openingHourId = existing?.id;
+
+      if (!openingHourId) {
+        const [created] = await db
+          .insert(openingHours)
+          .values({
+            locationId: this.data.id,
+            dayOfWeek,
+          })
+          .returning({ id: openingHours.id });
+
+        openingHourId = created?.id;
+      }
+
+      if (!openingHourId) {
+        return false;
+      }
+
+      await db
+        .delete(openingHourSlots)
+        .where(eq(openingHourSlots.openingHourId, openingHourId));
+
+      if (slots.length > 0) {
+        await db.insert(openingHourSlots).values(
+          slots.map((slot) => ({
+            openingHourId,
+            opensAt: slot.opensAt,
+            closesAt: slot.closesAt,
+          }))
+        );
+      }
 
       return true;
     } catch (error) {
