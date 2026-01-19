@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectOpeningHour } from "@/lib/db/types";
+import { SelectOpeningHourSlot } from "@/lib/db/types";
 import { updateOpeningHours } from "@/lib/opening-hours/functions";
 import { timeStringToTime } from "@/lib/utils";
 import {
@@ -14,7 +14,7 @@ import {
   TimeValue,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
 type Slot = {
   opensAt: string;
@@ -30,7 +30,7 @@ export default function UpdateOpeningHoursForm({
 }: {
   locationId: string;
   dayOfWeek: number;
-  slots: SelectOpeningHour[];
+  slots: SelectOpeningHourSlot[];
 }) {
   const formAction = updateOpeningHours.bind(null, locationId, dayOfWeek);
 
@@ -42,14 +42,15 @@ export default function UpdateOpeningHoursForm({
   const { open, close, isOpen, setOpen } = useOverlayState();
 
   // 👇 UI state for slots
-  const [slotsState, setSlotsState] = useState<Slot[]>(slots);
+  const defaultSlots = useMemo(() => slots, [slots]);
+  const [slotsState, setSlotsState] = useState<Slot[]>(defaultSlots);
 
   // Reset UI slots when opening modal or when props change
   useEffect(() => {
     if (isOpen) {
-      setSlotsState(slots);
+      setSlotsState((state.fieldValues?.slots as Slot[]) ?? defaultSlots);
     }
-  }, [isOpen, slots]);
+  }, [isOpen, state.fieldValues?.slots, defaultSlots]);
 
   // Close on success
   useEffect(() => {

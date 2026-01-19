@@ -19,20 +19,22 @@ export async function updateOpeningHours(
 ): Promise<FormState<OpeningHoursFormProps>> {
   const slotCount = Number(formData.get("slotCount") ?? 0);
 
-  const slots = Array.from({ length: slotCount }).map((_, idx) => ({
-    opensAt: String(formData.get(`slots.${idx}.opensAt`)),
-    closesAt: String(formData.get(`slots.${idx}.closesAt`)),
-  }));
-
-  const parsed = openingHoursFormSchema(slotCount).safeParse({
+  const rawData: OpeningHoursFormProps = {
     dayOfWeek,
-    slots,
-  });
+    slots: Array.from({ length: slotCount }).map((_, idx) => ({
+      opensAt: String(formData.get(`slots.${idx}.opensAt`)),
+      closesAt: String(formData.get(`slots.${idx}.closesAt`)),
+    })),
+  };
+
+  const parsed = openingHoursFormSchema(slotCount).safeParse(rawData);
 
   if (!parsed.success) {
     console.error("parsing error in updateOpeningHours:", parsed.error);
     return {
       status: "error",
+      fieldErrors: z.treeifyError(parsed.error).properties,
+      fieldValues: rawData,
     };
   }
 
@@ -63,12 +65,7 @@ export async function updateOpeningHours(
 
   return {
     status: "success",
-    fieldValues: {
-      slots: parsed.data.slots.map((slot) => ({
-        opensAt: slot.opensAt,
-        closesAt: slot.closesAt,
-      })),
-    },
+    fieldValues: parsed.data,
   };
 }
 
@@ -107,9 +104,8 @@ export async function upsertOpeningHourException(
   }
 
   if (originalDate && originalDate !== parsed.data.date) {
-    const deleteSuccess = await location.deleteOpeningHourException(
-      originalDate
-    );
+    const deleteSuccess =
+      await location.deleteOpeningHourException(originalDate);
     if (!deleteSuccess) {
       console.log("delete error");
       return { status: "error", fieldValues: parsed.data };
@@ -136,4 +132,26 @@ export async function upsertOpeningHourException(
     status: "success",
     fieldValues: parsed.data,
   };
+}
+
+export async function deleteOpeningHoursException(
+  id: string,
+  locationId: string,
+  prevState: "default" | "error" | "success"
+): Promise<"default" | "error" | "success"> {
+  const loc = await salonCore.getLocation(locationId);
+  if (!loc) {
+    console.error("error getting location");
+    return "error";
+  }
+
+  const success = await loc.deleteOpeningHourException(id);
+
+  if (!success) {
+    return "error";
+  }
+
+  revalidatePath("/");
+
+  return "success";
 }

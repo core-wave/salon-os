@@ -70,11 +70,26 @@ export const openingHours = pgTable(
 
     // 0 = Sunday, 6 = Saturday
     dayOfWeek: integer("day_of_week").notNull(),
+  },
+  (t) => [
+    index("opening_hours_location_idx").on(t.locationId),
+    uniqueIndex("opening_hours_unique").on(t.locationId, t.dayOfWeek),
+  ]
+);
+
+export const openingHourSlots = pgTable(
+  "opening_hour_slots",
+  {
+    id: uuid("id").primaryKey().$defaultFn(uuidv7),
+
+    openingHourId: uuid("opening_hour_id")
+      .notNull()
+      .references(() => openingHours.id, { onDelete: "cascade" }),
 
     opensAt: time("opens_at").notNull(),
     closesAt: time("closes_at").notNull(),
   },
-  (t) => [index("opening_hours_location_idx").on(t.locationId)]
+  (t) => [index("opening_hour_slot_hour_idx").on(t.openingHourId)]
 );
 
 export const openingHourExceptions = pgTable(
