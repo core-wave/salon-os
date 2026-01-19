@@ -112,3 +112,8 @@ export type SelectCustomer = Omit<
   typeof customers.$inferSelect,
   "organizationId"
 >;
+
+export type InsertCustomer = Omit<
+  typeof customers.$inferInsert,
+  "id" | "createdAt"
+>;
