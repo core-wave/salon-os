@@ -15,6 +15,7 @@ import { and, eq, asc, desc, inArray } from "drizzle-orm";
 import {
   InsertAppointment,
   InsertAppointmentType,
+  InsertCustomer,
   InsertLocation,
   InsertOrganization,
   SelectAppointment,
@@ -214,6 +215,47 @@ class Core {
       return res.count > 0;
     } catch (error) {
       console.error("error deleting appointment type:", error);
+      return false;
+    }
+  }
+
+  // Customers
+
+  public async createCustomer(data: InsertCustomer): Promise<boolean> {
+    try {
+      const res = await db.insert(customers).values(data);
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating customer:", error);
+      return false;
+    }
+  }
+
+  public async updateCustomer(
+    id: SelectCustomer["id"],
+    data: Partial<Omit<SelectCustomer, "id" | "createdAt">>
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .update(customers)
+        .set(data)
+        .where(eq(customers.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating customer:", error);
+      return false;
+    }
+  }
+
+  public async deleteCustomer(id: SelectCustomer["id"]): Promise<boolean> {
+    try {
+      const res = await db.delete(customers).where(eq(customers.id, id));
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting customer:", error);
       return false;
     }
   }
