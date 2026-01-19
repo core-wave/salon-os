@@ -615,14 +615,14 @@ class CLocation {
     }
   }
 
-  public async deleteOpeningHourException(date: string): Promise<boolean> {
+  public async deleteOpeningHourException(id: string): Promise<boolean> {
     try {
       await db
         .delete(openingHourExceptions)
         .where(
           and(
             eq(openingHourExceptions.locationId, this.data.id),
-            eq(openingHourExceptions.date, date)
+            eq(openingHourExceptions.id, id)
           )
         );
 

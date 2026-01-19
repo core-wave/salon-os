@@ -104,9 +104,8 @@ export async function upsertOpeningHourException(
   }
 
   if (originalDate && originalDate !== parsed.data.date) {
-    const deleteSuccess = await location.deleteOpeningHourException(
-      originalDate
-    );
+    const deleteSuccess =
+      await location.deleteOpeningHourException(originalDate);
     if (!deleteSuccess) {
       console.log("delete error");
       return { status: "error", fieldValues: parsed.data };
@@ -133,4 +132,26 @@ export async function upsertOpeningHourException(
     status: "success",
     fieldValues: parsed.data,
   };
+}
+
+export async function deleteOpeningHoursException(
+  id: string,
+  locationId: string,
+  prevState: "default" | "error" | "success"
+): Promise<"default" | "error" | "success"> {
+  const loc = await salonCore.getLocation(locationId);
+  if (!loc) {
+    console.error("error getting location");
+    return "error";
+  }
+
+  const success = await loc.deleteOpeningHourException(id);
+
+  if (!success) {
+    return "error";
+  }
+
+  revalidatePath("/");
+
+  return "success";
 }

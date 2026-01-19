@@ -5,6 +5,7 @@ import { salonCore } from "@/lib/core";
 import { notFound } from "next/navigation";
 import UpdateOpeningHoursForm from "@/components/forms/update-opening-hours";
 import UpsertOpeningHourExceptionForm from "@/components/forms/upsert-opening-hour-exception";
+import DeleteOpeningHourExceptionForm from "@/components/forms/delete-opening-hour-exception";
 
 const DAYS = {
   0: "Sunday",
@@ -60,11 +61,11 @@ export default async function OpeningHoursPage({
       <Card className="gap-6">
         <h2 className="font-semibold text-lg">Regular Opening Hours</h2>
 
-        <div className="grid grid-cols-[auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+        <div className="grid grid-cols-[repeat(3,1fr)_auto] gap-y-3 gap-x-4 items-center">
           <Label className="font-semibold">Day</Label>
           <Label className="font-semibold">Status</Label>
           <Label className="font-semibold">Opening Hours</Label>
-          <Label className="font-semibold">Actions</Label>
+          <div />
 
           {openingHoursByDay.map((day) => (
             <Fragment key={day.dayOfWeek}>
@@ -126,15 +127,16 @@ export default async function OpeningHoursPage({
             No exceptions yet. Add one to override a specific date.
           </p>
         ) : (
-          <div className="grid grid-cols-[auto_auto_auto_auto] gap-y-3 gap-x-4 items-center">
+          <div className="grid grid-cols-[repeat(4,1fr)_auto] gap-y-3 gap-x-4 items-center">
             <Label className="font-semibold">Date</Label>
             <Label className="font-semibold">Status</Label>
             <Label className="font-semibold">Opening Hours</Label>
-            <Label className="font-semibold">Actions</Label>
+            <Label className="font-semibold">Description</Label>
+            <div />
 
             {openingHourExceptions.map((exception) => (
               <Fragment key={exception.id}>
-                <Separator className="col-span-4" />
+                <Separator className="col-span-5" />
                 <Label>{exception.date}</Label>
 
                 {exception.isClosed ? (
@@ -161,12 +163,11 @@ export default async function OpeningHoursPage({
                       </Chip>
                     ))
                   )}
-                  {exception.remark && (
-                    <Chip variant="soft" className="text-muted">
-                      {exception.remark}
-                    </Chip>
-                  )}
                 </div>
+
+                <Label className="text-sm font-normal text-muted">
+                  {exception.remark}
+                </Label>
 
                 <div className="flex">
                   <UpsertOpeningHourExceptionForm
@@ -176,6 +177,10 @@ export default async function OpeningHoursPage({
                       remark: exception.remark ?? null,
                       slots: exception.slots,
                     }}
+                  />
+                  <DeleteOpeningHourExceptionForm
+                    id={exception.id}
+                    locationId={location.data.id}
                   />
                 </div>
               </Fragment>
