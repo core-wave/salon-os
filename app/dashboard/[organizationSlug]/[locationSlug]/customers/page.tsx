@@ -48,11 +48,11 @@ export default async function CustomersPage({
               <div className="flex">
                 <UpdateCustomerForm
                   customer={customer}
-                  locationSlug={locationSlug}
+                  organizationSlug={organizationSlug}
                 />
                 <DeleteCustomerForm
                   id={customer.id}
-                  locationSlug={locationSlug}
+                  organizationSlug={organizationSlug}
                 />
               </div>
             </Fragment>

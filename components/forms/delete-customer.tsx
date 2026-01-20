@@ -6,13 +6,13 @@ import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
 export default function DeleteCustomerForm({
-  locationSlug,
+  organizationSlug,
   id,
 }: {
-  locationSlug: string;
+  organizationSlug: string;
   id: string;
 }) {
-  const formAction = deleteCustomer.bind(null, locationSlug, id);
+  const formAction = deleteCustomer.bind(null, organizationSlug, id);
 
   const [state, action, isLoading] = useActionState(formAction, "default");
 
