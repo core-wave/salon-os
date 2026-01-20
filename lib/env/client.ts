@@ -3,7 +3,9 @@ import { clientSchema } from "./schema";
 
 export const clientEnv = (() => {
   try {
-    return clientSchema.parse(process.env);
+    return clientSchema.parse({
+      NEXT_PUBLIC_TOASTER_TIMEOUT: process.env.NEXT_PUBLIC_TOASTER_TIMEOUT,
+    });
   } catch (err) {
     if (err instanceof ZodError) {
       const vars = err.issues.map((issue) => `- ${issue.path.join(".")}`);

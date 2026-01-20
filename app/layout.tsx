@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Toast } from "@heroui/react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
           className={`bg-background flex w-full min-h-dvh ${inter.className}`}
         >
           {children}
+          <Toast.Container placement="bottom end" />
         </body>
       </Providers>
     </html>

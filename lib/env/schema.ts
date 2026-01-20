@@ -9,5 +9,5 @@ export const serverSchema = z.object({
 });
 
 export const clientSchema = z.object({
-  // NEXT_PUBLIC_SITE_URL: z.url(),
+  NEXT_PUBLIC_TOASTER_TIMEOUT: z.coerce.number(),
 });
