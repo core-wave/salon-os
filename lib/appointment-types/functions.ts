@@ -7,10 +7,14 @@ import { revalidatePath } from "next/cache";
 import { AppointmentTypeFormProps, appointmentTypeFormSchema } from "./schemas";
 
 export async function deleteAppointmentType(
+  locationSlug: string,
   id: string,
-  prevState: "default" | "error" | "success"
+  prevState: "default" | "error" | "success",
 ): Promise<"default" | "error" | "success"> {
-  const success = await salonCore.deleteAppointmentType(id);
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc) return "error";
+
+  const success = await loc.deleteAppointmentType(id);
 
   if (!success) {
     return "error";
@@ -22,10 +26,10 @@ export async function deleteAppointmentType(
 }
 
 export async function createAppointmentType(
-  locationId: string,
+  locationSlug: string,
   currency: string,
   prevState: FormState<AppointmentTypeFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<AppointmentTypeFormProps>> {
   const rawData: AppointmentTypeFormProps = {
     name: formData.get("name") as string,
@@ -47,10 +51,14 @@ export async function createAppointmentType(
     };
   }
 
-  const success = await salonCore.createAppointmentType({
-    ...parsed.data,
-    locationId,
-  });
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
+
+  const success = await loc.createAppointmentType(parsed.data);
 
   if (!success) {
     return {
@@ -68,9 +76,10 @@ export async function createAppointmentType(
 }
 
 export async function updateAppointmentType(
+  locationSlug: string,
   id: string,
   prevState: FormState<AppointmentTypeFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<AppointmentTypeFormProps>> {
   const rawData: AppointmentTypeFormProps = {
     name: formData.get("name") as string,
@@ -92,7 +101,14 @@ export async function updateAppointmentType(
     };
   }
 
-  const success = await salonCore.updateAppointmentType(id, parsed.data);
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
+
+  const success = await loc.updateAppointmentType(id, parsed.data);
 
   if (!success) {
     return {

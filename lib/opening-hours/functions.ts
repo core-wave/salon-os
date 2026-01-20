@@ -12,10 +12,10 @@ import {
 } from "./schema";
 
 export async function updateOpeningHours(
-  locationId: string,
+  locationSlug: string,
   dayOfWeek: number,
   prevState: FormState<OpeningHoursFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<OpeningHoursFormProps>> {
   const slotCount = Number(formData.get("slotCount") ?? 0);
 
@@ -38,23 +38,24 @@ export async function updateOpeningHours(
     };
   }
 
-  const location = await salonCore.getLocation(locationId);
-  if (!location) {
-    console.log("location error");
-    return { status: "error" };
-  }
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
 
-  const deleteSuccess = await location.deleteOpeningHours(dayOfWeek);
+  const deleteSuccess = await loc.deleteOpeningHours(dayOfWeek);
   if (!deleteSuccess) {
     console.log("delete error");
     return { status: "error" };
   }
 
   if (parsed.data?.slots.length > 0) {
-    const createSuccess = await location.setOpeningHours(
+    const createSuccess = await loc.setOpeningHours({
       dayOfWeek,
-      parsed.data.slots
-    );
+      slots: parsed.data.slots,
+    });
     if (!createSuccess) {
       console.log("create error");
       return { status: "error" };
@@ -70,10 +71,10 @@ export async function updateOpeningHours(
 }
 
 export async function upsertOpeningHourException(
-  locationId: string,
+  locationSlug: string,
   originalDate: string | null,
   prevState: FormState<OpeningHourExceptionFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<OpeningHourExceptionFormProps>> {
   const slotCount = Number(formData.get("slotCount") ?? 0);
 
@@ -97,15 +98,15 @@ export async function upsertOpeningHourException(
     };
   }
 
-  const location = await salonCore.getLocation(locationId);
-  if (!location) {
-    console.log("location error");
-    return { status: "error", fieldValues: parsed.data };
-  }
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
 
   if (originalDate && originalDate !== parsed.data.date) {
-    const deleteSuccess =
-      await location.deleteOpeningHourException(originalDate);
+    const deleteSuccess = await loc.deleteOpeningHourException(originalDate);
     if (!deleteSuccess) {
       console.log("delete error");
       return { status: "error", fieldValues: parsed.data };
@@ -114,7 +115,7 @@ export async function upsertOpeningHourException(
 
   const isClosed = parsed.data.slots.length === 0;
 
-  const saveSuccess = await location.upsertOpeningHourException({
+  const saveSuccess = await loc.upsertOpeningHourException({
     date: parsed.data.date,
     isClosed,
     remark: parsed.data.remark ?? null,
@@ -135,15 +136,12 @@ export async function upsertOpeningHourException(
 }
 
 export async function deleteOpeningHoursException(
+  locationSlug: string,
   id: string,
-  locationId: string,
-  prevState: "default" | "error" | "success"
+  prevState: "default" | "error" | "success",
 ): Promise<"default" | "error" | "success"> {
-  const loc = await salonCore.getLocation(locationId);
-  if (!loc) {
-    console.error("error getting location");
-    return "error";
-  }
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc) return "error";
 
   const success = await loc.deleteOpeningHourException(id);
 

@@ -5,8 +5,14 @@ import { AlertDialog, Button, Spinner, useOverlayState } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
-export default function DeleteCustomerForm({ id }: { id: string }) {
-  const formAction = deleteCustomer.bind(null, id);
+export default function DeleteCustomerForm({
+  organizationSlug,
+  id,
+}: {
+  organizationSlug: string;
+  id: string;
+}) {
+  const formAction = deleteCustomer.bind(null, organizationSlug, id);
 
   const [state, action, isLoading] = useActionState(formAction, "default");
 

@@ -17,11 +17,13 @@ import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
 export default function UpdateCustomerForm({
+  organizationSlug,
   customer,
 }: {
+  organizationSlug: string;
   customer: SelectCustomer;
 }) {
-  const formAction = updateCustomer.bind(null, customer.id);
+  const formAction = updateCustomer.bind(null, organizationSlug, customer.id);
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",

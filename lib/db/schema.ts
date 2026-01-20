@@ -33,7 +33,7 @@ export const locations = pgTable(
 
     name: varchar("name", { length: 255 }).notNull(), // e.g. "Main salon"
 
-    slug: text("slug").notNull(), // TODO: make this, in combination with orgSlug, unique
+    slug: text("slug").notNull().unique(), // TODO: make this, in combination with orgSlug, unique
 
     placeId: text("place_id").notNull(),
     formattedAddress: text("formatted_address").notNull(),
@@ -56,7 +56,7 @@ export const locations = pgTable(
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (t) => [index("location_org_idx").on(t.organizationId)]
+  (t) => [index("location_org_idx").on(t.organizationId)],
 );
 
 export const openingHours = pgTable(
@@ -74,7 +74,7 @@ export const openingHours = pgTable(
   (t) => [
     index("opening_hours_location_idx").on(t.locationId),
     uniqueIndex("opening_hours_unique").on(t.locationId, t.dayOfWeek),
-  ]
+  ],
 );
 
 export const openingHourSlots = pgTable(
@@ -89,7 +89,7 @@ export const openingHourSlots = pgTable(
     opensAt: time("opens_at").notNull(),
     closesAt: time("closes_at").notNull(),
   },
-  (t) => [index("opening_hour_slot_hour_idx").on(t.openingHourId)]
+  (t) => [index("opening_hour_slot_hour_idx").on(t.openingHourId)],
 );
 
 export const openingHourExceptions = pgTable(
@@ -110,7 +110,7 @@ export const openingHourExceptions = pgTable(
   (t) => [
     index("opening_exception_location_idx").on(t.locationId),
     uniqueIndex("opening_exception_unique").on(t.locationId, t.date),
-  ]
+  ],
 );
 
 export const openingHourExceptionSlots = pgTable(
@@ -125,7 +125,7 @@ export const openingHourExceptionSlots = pgTable(
     opensAt: time("opens_at").notNull(),
     closesAt: time("closes_at").notNull(),
   },
-  (t) => [index("opening_exception_slot_exception_idx").on(t.exceptionId)]
+  (t) => [index("opening_exception_slot_exception_idx").on(t.exceptionId)],
 );
 
 export const appointmentTypes = pgTable(
@@ -149,7 +149,7 @@ export const appointmentTypes = pgTable(
 
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [index("appt_type_loc_idx").on(t.locationId)]
+  (t) => [index("appt_type_loc_idx").on(t.locationId)],
 );
 
 export const appointments = pgTable(
@@ -181,7 +181,7 @@ export const appointments = pgTable(
     index("appointment_user_idx").on(t.customerId),
     index("appointment_location_idx").on(t.locationId),
     index("appointment_start_idx").on(t.startsAt),
-  ]
+  ],
 );
 
 export const customers = pgTable(
@@ -216,5 +216,5 @@ export const customers = pgTable(
     uniqueIndex("customers_org_phone_unique")
       .on(table.organizationId, table.phone)
       .where(isNotNull(table.phone)),
-  ]
+  ],
 );

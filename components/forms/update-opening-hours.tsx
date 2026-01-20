@@ -11,7 +11,6 @@ import {
   useOverlayState,
   TimeField,
   DateInputGroup,
-  TimeValue,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useActionState, useEffect, useMemo, useState } from "react";
@@ -21,18 +20,16 @@ type Slot = {
   closesAt: string;
 };
 
-type Test = TimeValue;
-
 export default function UpdateOpeningHoursForm({
-  locationId,
+  locationSlug,
   dayOfWeek,
   slots,
 }: {
-  locationId: string;
+  locationSlug: string;
   dayOfWeek: number;
   slots: SelectOpeningHourSlot[];
 }) {
-  const formAction = updateOpeningHours.bind(null, locationId, dayOfWeek);
+  const formAction = updateOpeningHours.bind(null, locationSlug, dayOfWeek);
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",

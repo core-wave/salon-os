@@ -30,16 +30,16 @@ type OpeningHourException = {
 };
 
 export default function UpsertOpeningHourExceptionForm({
-  locationId,
+  locationSlug,
   exception,
 }: {
-  locationId: string;
+  locationSlug: string;
   exception?: OpeningHourException;
 }) {
   const formAction = upsertOpeningHourException.bind(
     null,
-    locationId,
-    exception?.date ?? null
+    locationSlug,
+    exception?.date ?? null,
   );
 
   const [state, action, isLoading] = useActionState(formAction, {
@@ -189,7 +189,11 @@ export default function UpsertOpeningHourExceptionForm({
                   Add slot
                 </Button>
 
-                <input type="hidden" name="slotCount" value={slotsState.length} />
+                <input
+                  type="hidden"
+                  name="slotCount"
+                  value={slotsState.length}
+                />
               </Modal.Body>
 
               <Modal.Footer>

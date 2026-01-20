@@ -21,11 +21,17 @@ import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
 export default function UpdateAppointmentTypeForm({
+  locationSlug,
   appointmentType,
 }: {
+  locationSlug: string;
   appointmentType: SelectAppointmentType;
 }) {
-  const formAction = updateAppointmentType.bind(null, appointmentType.id);
+  const formAction = updateAppointmentType.bind(
+    null,
+    locationSlug,
+    appointmentType.id,
+  );
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",
