@@ -7,12 +7,12 @@ import { useActionState, useEffect } from "react";
 
 export default function DeleteOpeningHourExceptionForm({
   id,
-  locationId,
+  locationSlug,
 }: {
   id: string;
-  locationId: string;
+  locationSlug: string;
 }) {
-  const formAction = deleteOpeningHoursException.bind(null, id, locationId);
+  const formAction = deleteOpeningHoursException.bind(null, locationSlug, id);
 
   const [state, action, isLoading] = useActionState(formAction, "default");
 

@@ -8,10 +8,10 @@ import { revalidatePath } from "next/cache";
 import { nextQuarterHour } from "../utils";
 
 export async function createAppointment(
-  locationId: string,
+  locationSlug: string,
   currency: string,
   prevState: FormState<AppointmentFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<AppointmentFormProps>> {
   const raw = Object.fromEntries(formData);
 
@@ -39,10 +39,14 @@ export async function createAppointment(
     };
   }
 
-  const success = await salonCore.createAppointment({
-    ...parsed.data,
-    locationId,
-  });
+  const loc = await salonCore.getLocationBySlug(locationSlug);
+  if (!loc)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
+
+  const success = await loc.createAppointment(parsed.data);
 
   if (!success) {
     return {

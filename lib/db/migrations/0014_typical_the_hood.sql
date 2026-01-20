@@ -1,0 +1,1 @@
+ALTER TABLE "locations" ADD CONSTRAINT "locations_slug_unique" UNIQUE("slug");

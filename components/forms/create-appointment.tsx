@@ -17,17 +17,17 @@ import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
 export default function CreateAppointmentForm({
-  locationId,
+  locationSlug,
   currency,
   appointmentTypes,
   customers,
 }: {
-  locationId: string;
+  locationSlug: string;
   currency: string;
   appointmentTypes: SelectAppointmentType[];
   customers: SelectCustomer[];
 }) {
-  const formAction = createAppointment.bind(null, locationId, currency);
+  const formAction = createAppointment.bind(null, locationSlug, currency);
 
   const [state, action, isLoading] = useActionState(formAction, {
     status: "default",

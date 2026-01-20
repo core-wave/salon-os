@@ -13,14 +13,14 @@ export default async function AppointmentTypesPage({
   params: Promise<{ organizationSlug: string; locationSlug: string }>;
 }) {
   const { organizationSlug, locationSlug } = await params;
+  const [org, loc] = await Promise.all([
+    salonCore.getOrganizationBySlug(organizationSlug),
+    salonCore.getLocationBySlug(locationSlug),
+  ]);
 
-  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!organization) notFound();
+  if (!org || !loc) notFound();
 
-  const location = await organization.getLocationBySlug(locationSlug);
-  if (!location) notFound();
-
-  const appointmentTypes = await location.listAppointmentTypes();
+  const appointmentTypes = await loc.listAppointmentTypes();
 
   return (
     <>
@@ -30,7 +30,7 @@ export default async function AppointmentTypesPage({
       >
         {/* TODO: Remove hardcoded currency */}
         <CreateAppointmentTypeForm
-          locationId={location.data.id}
+          locationSlug={loc.data.slug}
           currency="EUR"
         />
       </DashboardPageHeader>
@@ -58,8 +58,14 @@ export default async function AppointmentTypesPage({
                 {type.isActive ? "Active" : "Inactive"}
               </Chip>
               <div className="flex">
-                <UpdateAppointmentTypeForm appointmentType={type} />
-                <DeleteAppointmentTypeForm id={type.id} />
+                <UpdateAppointmentTypeForm
+                  appointmentType={type}
+                  locationSlug={locationSlug}
+                />
+                <DeleteAppointmentTypeForm
+                  id={type.id}
+                  locationSlug={locationSlug}
+                />
               </div>
             </Fragment>
           ))}

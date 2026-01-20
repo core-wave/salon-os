@@ -12,13 +12,14 @@ export default async function OverviewPage({
 }) {
   const { organizationSlug, locationSlug } = await params;
 
-  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!organization) notFound();
+  const [org, loc] = await Promise.all([
+    salonCore.getOrganizationBySlug(organizationSlug),
+    salonCore.getLocationBySlug(locationSlug),
+  ]);
 
-  const location = await organization.getLocationBySlug(locationSlug);
-  if (!location) notFound();
+  if (!org || !loc) notFound();
 
-  const appointments = await location.listAppointments();
+  const appointments = await loc.listAppointments();
 
   const nextAppointment = appointments.find((apt) => apt.status === "Planned");
 
