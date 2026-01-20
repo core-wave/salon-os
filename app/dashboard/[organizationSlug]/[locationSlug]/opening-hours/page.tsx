@@ -25,22 +25,22 @@ export default async function OpeningHoursPage({
   params: Promise<{ organizationSlug: string; locationSlug: string }>;
 }) {
   const { organizationSlug, locationSlug } = await params;
+  const [org, loc] = await Promise.all([
+    salonCore.getOrganizationBySlug(organizationSlug),
+    salonCore.getLocationBySlug(locationSlug),
+  ]);
 
-  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!organization) notFound();
+  if (!org || !loc) notFound();
 
-  const location = await organization.getLocationBySlug(locationSlug);
-  if (!location) notFound();
-
-  const regularOpeningHours = await location.listRegularOpeningHours();
-  const openingHourExceptions = await location.listOpeningHourExceptions();
+  const [regular, exceptions] = await Promise.all([
+    loc.listOpeningHours(),
+    loc.listOpeningHourExceptions(),
+  ]);
 
   const openingHoursByDay = Object.keys(DAYS).map((key) => {
     const dayOfWeek = Number(key) as DayOfWeek;
 
-    const day = regularOpeningHours.find(
-      (entry) => entry.dayOfWeek === dayOfWeek
-    );
+    const day = regular.find((entry) => entry.dayOfWeek === dayOfWeek);
     const slots = day?.slots ?? [];
 
     return {
@@ -102,7 +102,7 @@ export default async function OpeningHoursPage({
               <div className="flex">
                 <UpdateOpeningHoursForm
                   dayOfWeek={day.dayOfWeek}
-                  locationId={location.data.id}
+                  locationSlug={loc.data.slug}
                   slots={day.slots}
                 />
               </div>
@@ -119,10 +119,10 @@ export default async function OpeningHoursPage({
               Override your regular hours for specific dates.
             </p>
           </div>
-          <UpsertOpeningHourExceptionForm locationId={location.data.id} />
+          <UpsertOpeningHourExceptionForm locationSlug={loc.data.slug} />
         </div>
 
-        {openingHourExceptions.length === 0 ? (
+        {exceptions.length === 0 ? (
           <p className="text-sm text-muted">
             No exceptions yet. Add one to override a specific date.
           </p>
@@ -134,7 +134,7 @@ export default async function OpeningHoursPage({
             <Label className="font-semibold">Description</Label>
             <div />
 
-            {openingHourExceptions.map((exception) => (
+            {exceptions.map((exception) => (
               <Fragment key={exception.id}>
                 <Separator className="col-span-5" />
                 <Label>{exception.date}</Label>
@@ -171,7 +171,7 @@ export default async function OpeningHoursPage({
 
                 <div className="flex">
                   <UpsertOpeningHourExceptionForm
-                    locationId={location.data.id}
+                    locationSlug={loc.data.slug}
                     exception={{
                       date: exception.date,
                       remark: exception.remark ?? null,
@@ -180,7 +180,7 @@ export default async function OpeningHoursPage({
                   />
                   <DeleteOpeningHourExceptionForm
                     id={exception.id}
-                    locationId={location.data.id}
+                    locationSlug={loc.data.slug}
                   />
                 </div>
               </Fragment>

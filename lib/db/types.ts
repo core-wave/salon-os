@@ -27,7 +27,7 @@ export type SelectOrganization = Omit<
 
 export type InsertLocation = Omit<
   typeof locations.$inferInsert,
-  "id" | "createdAt" | "isActive"
+  "id" | "createdAt" | "isActive" | "organizationId"
 >;
 
 export type SelectLocation = Omit<
@@ -39,17 +39,21 @@ export type SelectLocation = Omit<
 
 export type InsertOpeningHour = Omit<
   typeof openingHours.$inferInsert,
-  "id"
->;
+  "id" | "locationId"
+> & {
+  slots: InsertOpeningHourSlot[];
+};
 
 export type SelectOpeningHour = Omit<
   typeof openingHours.$inferSelect,
   "locationId"
->;
+> & {
+  slots: SelectOpeningHourSlot[];
+};
 
 export type InsertOpeningHourSlot = Omit<
   typeof openingHourSlots.$inferInsert,
-  "id"
+  "id" | "openingHourId"
 >;
 
 export type SelectOpeningHourSlot = Omit<
@@ -61,17 +65,19 @@ export type SelectOpeningHourSlot = Omit<
 
 export type InsertOpeningHourException = Omit<
   typeof openingHourExceptions.$inferInsert,
-  "id" | "createdAt"
->;
+  "id" | "createdAt" | "locationId"
+> & { slots: InsertOpeningHourExceptionSlot[] };
 
 export type SelectOpeningHourException = Omit<
   typeof openingHourExceptions.$inferSelect,
   "locationId"
->;
+> & {
+  slots: SelectOpeningHourExceptionSlot[];
+};
 
 export type InsertOpeningHourExceptionSlot = Omit<
   typeof openingHourExceptionSlots.$inferInsert,
-  "id"
+  "id" | "exceptionId"
 >;
 
 export type SelectOpeningHourExceptionSlot = Omit<
@@ -83,7 +89,7 @@ export type SelectOpeningHourExceptionSlot = Omit<
 
 export type InsertAppointmentType = Omit<
   typeof appointmentTypes.$inferInsert,
-  "id" | "createdAt"
+  "id" | "createdAt" | "locationId"
 >;
 
 export type SelectAppointmentType = Omit<
@@ -95,12 +101,12 @@ export type SelectAppointmentType = Omit<
 
 export type InsertAppointment = Omit<
   typeof appointments.$inferInsert,
-  "id" | "createdAt" | "status"
+  "id" | "createdAt" | "status" | "locationId"
 >;
 
 export type SelectAppointment = Omit<
   typeof appointments.$inferSelect,
-  "locationId" | "appointmentTypeId"
+  "locationId" | "appointmentTypeId" | "customerId"
 > & {
   appointmentType: SelectAppointmentType;
   customer: SelectCustomer;
@@ -115,5 +121,5 @@ export type SelectCustomer = Omit<
 
 export type InsertCustomer = Omit<
   typeof customers.$inferInsert,
-  "id" | "createdAt"
+  "id" | "createdAt" | "organizationId"
 >;

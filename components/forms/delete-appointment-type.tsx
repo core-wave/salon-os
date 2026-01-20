@@ -5,8 +5,14 @@ import { AlertDialog, Button, Spinner, useOverlayState } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useActionState, useEffect } from "react";
 
-export default function DeleteAppointmentTypeForm({ id }: { id: string }) {
-  const formAction = deleteAppointmentType.bind(null, id);
+export default function DeleteAppointmentTypeForm({
+  locationSlug,
+  id,
+}: {
+  locationSlug: string;
+  id: string;
+}) {
+  const formAction = deleteAppointmentType.bind(null, locationSlug, id);
 
   const [state, action, isLoading] = useActionState(formAction, "default");
 

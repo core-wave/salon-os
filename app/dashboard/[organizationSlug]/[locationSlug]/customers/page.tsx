@@ -13,14 +13,14 @@ export default async function CustomersPage({
   params: Promise<{ organizationSlug: string; locationSlug: string }>;
 }) {
   const { organizationSlug, locationSlug } = await params;
+  const [org, loc] = await Promise.all([
+    salonCore.getOrganizationBySlug(organizationSlug),
+    salonCore.getLocationBySlug(locationSlug),
+  ]);
 
-  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!organization) notFound();
+  if (!org || !loc) notFound();
 
-  const location = await organization.getLocationBySlug(locationSlug);
-  if (!location) notFound();
-
-  const customers = await organization.listCustomers();
+  const customers = await org.listCustomers();
 
   return (
     <>
@@ -28,7 +28,7 @@ export default async function CustomersPage({
         title="Customers"
         description="Manage your customer base"
       >
-        <CreateCustomerForm organizationId={organization.data.id} />
+        <CreateCustomerForm organizationSlug={org.data.slug} />
       </DashboardPageHeader>
 
       <Card className="gap-6">
@@ -44,12 +44,16 @@ export default async function CustomersPage({
               <Label className="font-medium">{customer.name}</Label>
               <Label className="font-normal">{customer.email}</Label>
               <Label className="font-normal">{customer.phone ?? "—"}</Label>
-              <Label className="font-normal">
-                {customer.notes ?? "—"}
-              </Label>
+              <Label className="font-normal">{customer.notes ?? "—"}</Label>
               <div className="flex">
-                <UpdateCustomerForm customer={customer} />
-                <DeleteCustomerForm id={customer.id} />
+                <UpdateCustomerForm
+                  customer={customer}
+                  organizationSlug={organizationSlug}
+                />
+                <DeleteCustomerForm
+                  id={customer.id}
+                  organizationSlug={organizationSlug}
+                />
               </div>
             </Fragment>
           ))}

@@ -19,17 +19,17 @@ export default async function AppointmentsPage({
   params: Promise<{ organizationSlug: string; locationSlug: string }>;
 }) {
   const { organizationSlug, locationSlug } = await params;
+  const [org, loc] = await Promise.all([
+    salonCore.getOrganizationBySlug(organizationSlug),
+    salonCore.getLocationBySlug(locationSlug),
+  ]);
 
-  const organization = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!organization) notFound();
-
-  const location = await organization.getLocationBySlug(locationSlug);
-  if (!location) notFound();
+  if (!org || !loc) notFound();
 
   const [appointments, appointmentTypes, customers] = await Promise.all([
-    location.listAppointments(),
-    location.listAppointmentTypes(),
-    organization.listCustomers(),
+    loc.listAppointments(),
+    loc.listAppointmentTypes(),
+    org.listCustomers(),
   ]);
 
   return (
@@ -41,7 +41,7 @@ export default async function AppointmentsPage({
         <CreateAppointmentForm
           appointmentTypes={appointmentTypes}
           currency="EUR"
-          locationId={location.data.id}
+          locationSlug={loc.data.slug}
           customers={customers}
         />
       </DashboardPageHeader>

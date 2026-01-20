@@ -17,6 +17,8 @@ import {
   InsertAppointmentType,
   InsertCustomer,
   InsertLocation,
+  InsertOpeningHour,
+  InsertOpeningHourException,
   InsertOrganization,
   SelectAppointment,
   SelectAppointmentType,
@@ -24,14 +26,14 @@ import {
   SelectLocation,
   SelectOpeningHour,
   SelectOpeningHourException,
-  SelectOpeningHourExceptionSlot,
-  SelectOpeningHourSlot,
   SelectOrganization,
 } from "../db/types";
 
 class Core {
+  // Organizations
+
   public async getOrganizationBySlug(
-    slug: SelectOrganization["slug"]
+    slug: SelectOrganization["slug"],
   ): Promise<COrganization | null> {
     try {
       const res = await auth.api.getFullOrganization({
@@ -71,11 +73,9 @@ class Core {
     }
   }
 
-  // Organizations
-
   public async createOrganization(
     { name, slug }: InsertOrganization,
-    userId: string
+    userId: string,
   ): Promise<COrganization | null> {
     try {
       const res = await auth.api.createOrganization({
@@ -97,14 +97,12 @@ class Core {
     }
   }
 
-  // Locations
-
-  public async getLocation(id: string): Promise<CLocation | null> {
+  public async getLocationBySlug(slug: string): Promise<CLocation | null> {
     try {
       const [res] = await db
         .select()
         .from(locations)
-        .where(eq(locations.id, id))
+        .where(eq(locations.slug, slug))
         .limit(1);
 
       return new CLocation({
@@ -132,10 +130,18 @@ class Core {
       return null;
     }
   }
+}
+
+class COrganization {
+  constructor(readonly data: SelectOrganization) {}
+
+  // Locations
 
   public async createLocation(data: InsertLocation): Promise<boolean> {
     try {
-      const res = await db.insert(locations).values(data);
+      const res = await db
+        .insert(locations)
+        .values({ ...data, organizationId: this.data.id });
 
       return res.count === 1;
     } catch (error) {
@@ -146,13 +152,15 @@ class Core {
 
   public async updateLocation(
     id: SelectLocation["id"],
-    data: Partial<Omit<SelectLocation, "id" | "createdAt">>
+    data: Partial<Omit<SelectLocation, "id" | "createdAt">>,
   ): Promise<boolean> {
     try {
       const res = await db
         .update(locations)
         .set(data)
-        .where(eq(locations.id, id));
+        .where(
+          and(eq(locations.id, id), eq(locations.organizationId, this.data.id)),
+        );
 
       return res.count === 1;
     } catch (error) {
@@ -163,190 +171,16 @@ class Core {
 
   public async deleteLocation(id: SelectLocation["id"]): Promise<boolean> {
     try {
-      const res = await db.delete(locations).where(eq(locations.id, id));
+      const res = await db
+        .delete(locations)
+        .where(
+          and(eq(locations.id, id), eq(locations.organizationId, this.data.id)),
+        );
 
       return res.count > 0;
     } catch (error) {
       console.error("error deleting location:", error);
       return false;
-    }
-  }
-
-  // Appointment Types
-
-  public async createAppointmentType(
-    data: InsertAppointmentType
-  ): Promise<boolean> {
-    try {
-      const res = await db.insert(appointmentTypes).values(data);
-
-      return res.count === 1;
-    } catch (error) {
-      console.error("error creating appointment type:", error);
-      return false;
-    }
-  }
-
-  public async updateAppointmentType(
-    id: SelectAppointmentType["id"],
-    data: Partial<Omit<SelectAppointmentType, "id">>
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .update(appointmentTypes)
-        .set(data)
-        .where(eq(appointmentTypes.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error updating appointment type:", error);
-      return false;
-    }
-  }
-
-  public async deleteAppointmentType(
-    id: SelectAppointmentType["id"]
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .delete(appointmentTypes)
-        .where(eq(appointmentTypes.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error deleting appointment type:", error);
-      return false;
-    }
-  }
-
-  // Customers
-
-  public async createCustomer(data: InsertCustomer): Promise<boolean> {
-    try {
-      const res = await db.insert(customers).values(data);
-
-      return res.count === 1;
-    } catch (error) {
-      console.error("error creating customer:", error);
-      return false;
-    }
-  }
-
-  public async updateCustomer(
-    id: SelectCustomer["id"],
-    data: Partial<Omit<SelectCustomer, "id" | "createdAt">>
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .update(customers)
-        .set(data)
-        .where(eq(customers.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error updating customer:", error);
-      return false;
-    }
-  }
-
-  public async deleteCustomer(id: SelectCustomer["id"]): Promise<boolean> {
-    try {
-      const res = await db.delete(customers).where(eq(customers.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error deleting customer:", error);
-      return false;
-    }
-  }
-
-  // Appointments
-
-  public async createAppointment(data: InsertAppointment): Promise<boolean> {
-    try {
-      const res = await db.insert(appointments).values(data);
-
-      return res.count === 1;
-    } catch (error) {
-      console.error("error creating appointment:", error);
-      return false;
-    }
-  }
-
-  public async updateAppointment(
-    id: SelectAppointment["id"],
-    data: Partial<Omit<SelectAppointment, "id">>
-  ): Promise<boolean> {
-    try {
-      const res = await db
-        .update(appointments)
-        .set(data)
-        .where(eq(appointments.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error updating appointment:", error);
-      return false;
-    }
-  }
-
-  public async deleteAppointment(
-    id: SelectAppointment["id"]
-  ): Promise<boolean> {
-    try {
-      const res = await db.delete(appointments).where(eq(appointments.id, id));
-
-      return res.count > 0;
-    } catch (error) {
-      console.error("error deleting appointment:", error);
-      return false;
-    }
-  }
-}
-
-class COrganization {
-  constructor(readonly data: SelectOrganization) {}
-
-  public async getLocationBySlug(
-    slug: SelectLocation["slug"]
-  ): Promise<CLocation | null> {
-    try {
-      const [res] = await db
-        .select()
-        .from(locations)
-        .where(
-          and(
-            eq(locations.organizationId, this.data.id),
-            eq(locations.slug, slug)
-          )
-        )
-        .limit(1);
-
-      if (!res) return null;
-
-      return new CLocation({
-        id: res.id,
-        createdAt: res.createdAt,
-        name: res.name,
-        slug: res.slug,
-        isActive: res.isActive,
-        phone: res.phone,
-        formattedAddress: res.formattedAddress,
-        placeId: res.placeId,
-        googleMapsUri: res.googleMapsUri,
-        streetName: res.streetName,
-        streetNumber: res.streetNumber,
-        postalCode: res.postalCode,
-        city: res.city,
-        administrativeArea: res.administrativeArea,
-        countryCode: res.countryCode,
-        lat: res.lat,
-        lng: res.lng,
-        timeZone: res.timeZone,
-      });
-    } catch (error) {
-      console.error("error getting location:", error);
-      return null;
     }
   }
 
@@ -383,6 +217,55 @@ class COrganization {
     }
   }
 
+  // Customers
+
+  public async createCustomer(data: InsertCustomer): Promise<boolean> {
+    try {
+      const res = await db
+        .insert(customers)
+        .values({ ...data, organizationId: this.data.id });
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating customer:", error);
+      return false;
+    }
+  }
+
+  public async updateCustomer(
+    id: SelectCustomer["id"],
+    data: Partial<Omit<SelectCustomer, "id" | "createdAt">>,
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .update(customers)
+        .set(data)
+        .where(
+          and(eq(customers.id, id), eq(customers.organizationId, this.data.id)),
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating customer:", error);
+      return false;
+    }
+  }
+
+  public async deleteCustomer(id: SelectCustomer["id"]): Promise<boolean> {
+    try {
+      const res = await db
+        .delete(customers)
+        .where(
+          and(eq(customers.id, id), eq(customers.organizationId, this.data.id)),
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting customer:", error);
+      return false;
+    }
+  }
+
   public async listCustomers(): Promise<SelectCustomer[]> {
     try {
       return await db
@@ -407,6 +290,65 @@ class COrganization {
 class CLocation {
   constructor(readonly data: SelectLocation) {}
 
+  // Appointment Types
+
+  public async createAppointmentType(
+    data: InsertAppointmentType,
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .insert(appointmentTypes)
+        .values({ ...data, locationId: this.data.id });
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating appointment type:", error);
+      return false;
+    }
+  }
+
+  public async updateAppointmentType(
+    id: SelectAppointmentType["id"],
+    data: Partial<Omit<SelectAppointmentType, "id" | "createdAt">>,
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .update(appointmentTypes)
+        .set(data)
+        .where(
+          and(
+            eq(appointmentTypes.id, id),
+            eq(appointmentTypes.locationId, this.data.id),
+          ),
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating appointment type:", error);
+      return false;
+    }
+  }
+
+  public async deleteAppointmentType(
+    id: SelectAppointmentType["id"],
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .delete(appointmentTypes)
+        .where(
+          and(
+            eq(appointmentTypes.id, id),
+            eq(appointmentTypes.locationId, this.data.id),
+          ),
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting appointment type:", error);
+      return false;
+    }
+  }
+
   public async listAppointmentTypes(): Promise<SelectAppointmentType[]> {
     try {
       return await db
@@ -429,9 +371,109 @@ class CLocation {
     }
   }
 
-  public async listRegularOpeningHours(): Promise<
-    (SelectOpeningHour & { slots: SelectOpeningHourSlot[] })[]
-  > {
+  // Appointments
+
+  public async createAppointment(data: InsertAppointment): Promise<boolean> {
+    try {
+      const res = await db
+        .insert(appointments)
+        .values({ ...data, locationId: this.data.id });
+
+      return res.count === 1;
+    } catch (error) {
+      console.error("error creating appointment:", error);
+      return false;
+    }
+  }
+
+  public async updateAppointment(
+    id: SelectAppointment["id"],
+    data: Partial<Omit<SelectAppointment, "id">>,
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .update(appointments)
+        .set(data)
+        .where(
+          and(
+            eq(appointments.id, id),
+            eq(appointments.locationId, this.data.id),
+          ),
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error updating appointment:", error);
+      return false;
+    }
+  }
+
+  public async deleteAppointment(
+    id: SelectAppointment["id"],
+  ): Promise<boolean> {
+    try {
+      const res = await db
+        .delete(appointments)
+        .where(
+          and(
+            eq(appointments.id, id),
+            eq(appointments.locationId, this.data.id),
+          ),
+        );
+
+      return res.count > 0;
+    } catch (error) {
+      console.error("error deleting appointment:", error);
+      return false;
+    }
+  }
+
+  public async listAppointments(): Promise<SelectAppointment[]> {
+    try {
+      return await db
+        .select({
+          id: appointments.id,
+          createdAt: appointments.createdAt,
+          startsAt: appointments.startsAt,
+          customerId: appointments.customerId,
+          status: appointments.status,
+          notes: appointments.notes,
+          appointmentType: {
+            id: appointmentTypes.id,
+            createdAt: appointmentTypes.createdAt,
+            name: appointmentTypes.name,
+            description: appointmentTypes.description,
+            durationMinutes: appointmentTypes.durationMinutes,
+            price: appointmentTypes.price,
+            currency: appointmentTypes.currency,
+            isActive: appointmentTypes.isActive,
+          },
+          customer: {
+            id: customers.id,
+            createdAt: customers.createdAt,
+            name: customers.name,
+            email: customers.email,
+            phone: customers.phone,
+            userId: customers.userId,
+            notes: customers.notes,
+          },
+        })
+        .from(appointments)
+        .innerJoin(
+          appointmentTypes,
+          eq(appointments.appointmentTypeId, appointmentTypes.id),
+        )
+        .innerJoin(customers, eq(appointments.customerId, customers.id))
+        .where(eq(appointments.locationId, this.data.id));
+    } catch (error) {
+      console.error("error listing appointments:", error);
+      return [];
+    }
+  }
+
+  // Opening Hours
+
+  public async listOpeningHours(): Promise<SelectOpeningHour[]> {
     try {
       const days = await db
         .select({
@@ -471,15 +513,17 @@ class CLocation {
     }
   }
 
-  public async deleteOpeningHours(dayOfWeek: number): Promise<boolean> {
+  public async deleteOpeningHours(
+    dayOfWeek: SelectOpeningHour["dayOfWeek"],
+  ): Promise<boolean> {
     try {
       await db
         .delete(openingHours)
         .where(
           and(
             eq(openingHours.locationId, this.data.id),
-            eq(openingHours.dayOfWeek, dayOfWeek)
-          )
+            eq(openingHours.dayOfWeek, dayOfWeek),
+          ),
         );
 
       return true;
@@ -489,10 +533,10 @@ class CLocation {
     }
   }
 
-  public async setOpeningHours(
-    dayOfWeek: number,
-    slots: { opensAt: string; closesAt: string }[]
-  ): Promise<boolean> {
+  public async setOpeningHours({
+    dayOfWeek,
+    slots,
+  }: InsertOpeningHour): Promise<boolean> {
     try {
       const [existing] = await db
         .select({ id: openingHours.id })
@@ -500,8 +544,8 @@ class CLocation {
         .where(
           and(
             eq(openingHours.locationId, this.data.id),
-            eq(openingHours.dayOfWeek, dayOfWeek)
-          )
+            eq(openingHours.dayOfWeek, dayOfWeek),
+          ),
         )
         .limit(1);
 
@@ -533,7 +577,7 @@ class CLocation {
             openingHourId,
             opensAt: slot.opensAt,
             closesAt: slot.closesAt,
-          }))
+          })),
         );
       }
 
@@ -544,10 +588,10 @@ class CLocation {
     }
   }
 
+  // Opening Hour Exceptions
+
   public async listOpeningHourExceptions(): Promise<
-    (SelectOpeningHourException & {
-      slots: SelectOpeningHourExceptionSlot[];
-    })[]
+    SelectOpeningHourException[]
   > {
     try {
       const exceptions = await db
@@ -590,12 +634,12 @@ class CLocation {
     }
   }
 
-  public async upsertOpeningHourException(input: {
-    date: string;
-    isClosed: boolean;
-    remark?: string | null;
-    slots: { opensAt: string; closesAt: string }[];
-  }): Promise<boolean> {
+  public async upsertOpeningHourException({
+    date,
+    isClosed,
+    remark,
+    slots,
+  }: InsertOpeningHourException): Promise<boolean> {
     try {
       const [existing] = await db
         .select({ id: openingHourExceptions.id })
@@ -603,8 +647,8 @@ class CLocation {
         .where(
           and(
             eq(openingHourExceptions.locationId, this.data.id),
-            eq(openingHourExceptions.date, input.date)
-          )
+            eq(openingHourExceptions.date, date),
+          ),
         )
         .limit(1);
 
@@ -615,9 +659,9 @@ class CLocation {
           .insert(openingHourExceptions)
           .values({
             locationId: this.data.id,
-            date: input.date,
-            isClosed: input.isClosed,
-            remark: input.remark ?? null,
+            date: date,
+            isClosed: isClosed,
+            remark: remark ?? null,
           })
           .returning({ id: openingHourExceptions.id });
 
@@ -626,8 +670,8 @@ class CLocation {
         await db
           .update(openingHourExceptions)
           .set({
-            isClosed: input.isClosed,
-            remark: input.remark ?? null,
+            isClosed: isClosed,
+            remark: remark ?? null,
           })
           .where(eq(openingHourExceptions.id, exceptionId));
       }
@@ -640,13 +684,13 @@ class CLocation {
         .delete(openingHourExceptionSlots)
         .where(eq(openingHourExceptionSlots.exceptionId, exceptionId));
 
-      if (!input.isClosed && input.slots.length > 0) {
+      if (!isClosed && slots.length > 0) {
         await db.insert(openingHourExceptionSlots).values(
-          input.slots.map((slot) => ({
+          slots.map((slot) => ({
             exceptionId,
             opensAt: slot.opensAt,
             closesAt: slot.closesAt,
-          }))
+          })),
         );
       }
 
@@ -657,64 +701,23 @@ class CLocation {
     }
   }
 
-  public async deleteOpeningHourException(id: string): Promise<boolean> {
+  public async deleteOpeningHourException(
+    id: SelectOpeningHourException["id"],
+  ): Promise<boolean> {
     try {
       await db
         .delete(openingHourExceptions)
         .where(
           and(
             eq(openingHourExceptions.locationId, this.data.id),
-            eq(openingHourExceptions.id, id)
-          )
+            eq(openingHourExceptions.id, id),
+          ),
         );
 
       return true;
     } catch (error) {
       console.error("error deleting opening hour exception:", error);
       return false;
-    }
-  }
-
-  public async listAppointments(): Promise<SelectAppointment[]> {
-    try {
-      return await db
-        .select({
-          id: appointments.id,
-          createdAt: appointments.createdAt,
-          startsAt: appointments.startsAt,
-          customerId: appointments.customerId,
-          status: appointments.status,
-          notes: appointments.notes,
-          appointmentType: {
-            id: appointmentTypes.id,
-            createdAt: appointmentTypes.createdAt,
-            name: appointmentTypes.name,
-            description: appointmentTypes.description,
-            durationMinutes: appointmentTypes.durationMinutes,
-            price: appointmentTypes.price,
-            currency: appointmentTypes.currency,
-            isActive: appointmentTypes.isActive,
-          },
-          customer: {
-            id: customers.id,
-            createdAt: customers.createdAt,
-            name: customers.name,
-            email: customers.email,
-            phone: customers.phone,
-            userId: customers.userId,
-            notes: customers.notes,
-          },
-        })
-        .from(appointments)
-        .innerJoin(
-          appointmentTypes,
-          eq(appointments.appointmentTypeId, appointmentTypes.id)
-        )
-        .innerJoin(customers, eq(appointments.customerId, customers.id))
-        .where(eq(appointments.locationId, this.data.id));
-    } catch (error) {
-      console.error("error listing appointments:", error);
-      return [];
     }
   }
 }

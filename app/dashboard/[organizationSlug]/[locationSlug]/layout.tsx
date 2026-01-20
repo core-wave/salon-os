@@ -27,17 +27,15 @@ export default async function DashboardLayout({
 }) {
   const { organizationSlug, locationSlug } = await params;
 
-  const org = await salonCore.getOrganizationBySlug(organizationSlug);
-  if (!org) notFound();
+  const [org, loc, session] = await Promise.all([
+    salonCore.getOrganizationBySlug(organizationSlug),
+    salonCore.getLocationBySlug(locationSlug),
+    auth.api.getSession({
+      headers: await headers(),
+    }),
+  ]);
 
-  const loc = await org.getLocationBySlug(locationSlug);
-  if (!loc) notFound();
-
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) notFound();
+  if (!org || !loc || !session) notFound();
 
   const user = session.user;
 

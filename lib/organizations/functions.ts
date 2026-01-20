@@ -11,7 +11,7 @@ import { slugify } from "../utils";
 
 export async function createOrganization(
   prevState: FormState<CreateOrganizationProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<CreateOrganizationProps>> {
   const rawData: CreateOrganizationProps = {
     name: formData.get("name") as string,
@@ -37,7 +37,7 @@ export async function createOrganization(
     const [org, placeDetails] = await Promise.all([
       salonCore.createOrganization(
         { name: parsed.data.name, slug: parsed.data.slug },
-        parsed.data.userId
+        parsed.data.userId,
       ),
       getPlaceDetails(parsed.data.placeId),
     ]);
@@ -50,10 +50,9 @@ export async function createOrganization(
       };
     }
 
-    const location = await salonCore.createLocation({
+    const location = await org.createLocation({
       name: placeDetails.city,
       slug: slugify(placeDetails.city),
-      organizationId: org.data.id,
       ...placeDetails,
     });
 

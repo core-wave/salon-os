@@ -7,10 +7,14 @@ import { revalidatePath } from "next/cache";
 import { CustomerFormProps, customerFormSchema } from "./schemas";
 
 export async function deleteCustomer(
+  organizationSlug: string,
   id: string,
-  prevState: "default" | "error" | "success"
+  prevState: "default" | "error" | "success",
 ): Promise<"default" | "error" | "success"> {
-  const success = await salonCore.deleteCustomer(id);
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!org) return "error";
+
+  const success = await org.deleteCustomer(id);
 
   if (!success) {
     return "error";
@@ -22,9 +26,9 @@ export async function deleteCustomer(
 }
 
 export async function createCustomer(
-  organizationId: string,
+  organizationSlug: string,
   prevState: FormState<CustomerFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<CustomerFormProps>> {
   const rawData: CustomerFormProps = {
     name: formData.get("name") as string,
@@ -44,10 +48,14 @@ export async function createCustomer(
     };
   }
 
-  const success = await salonCore.createCustomer({
-    ...parsed.data,
-    organizationId,
-  });
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!org)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
+
+  const success = await org.createCustomer(parsed.data);
 
   if (!success) {
     return {
@@ -65,9 +73,10 @@ export async function createCustomer(
 }
 
 export async function updateCustomer(
+  organizationSlug: string,
   id: string,
   prevState: FormState<CustomerFormProps>,
-  formData: FormData
+  formData: FormData,
 ): Promise<FormState<CustomerFormProps>> {
   const rawData: CustomerFormProps = {
     name: formData.get("name") as string,
@@ -87,7 +96,14 @@ export async function updateCustomer(
     };
   }
 
-  const success = await salonCore.updateCustomer(id, parsed.data);
+  const org = await salonCore.getOrganizationBySlug(organizationSlug);
+  if (!org)
+    return {
+      status: "error",
+      fieldValues: parsed.data,
+    };
+
+  const success = await org.updateCustomer(id, parsed.data);
 
   if (!success) {
     return {
