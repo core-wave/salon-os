@@ -1,18 +1,22 @@
 "use client";
 
+import SubmitButton from "@/components/form-fields/submit-button";
 import { SelectOrganization } from "@/lib/db/types";
 import { discordSendFeedback } from "@/lib/discord/functions";
+import { clientEnv } from "@/lib/env/client";
 import {
   Modal,
   Button,
   TextArea,
-  Spinner,
   useOverlayState,
   ErrorMessage,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { User } from "better-auth";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import CancelButton from "../form-fields/cancel-button";
 
 export default function FeedbackForm({
   organization,
@@ -29,11 +33,25 @@ export default function FeedbackForm({
 
   const { open, close, isOpen, setOpen } = useOverlayState();
 
+  const router = useRouter();
+
   useEffect(() => {
     if (state.status === "success") {
+      toast("Thank you for your feedback!", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state]);
+
+    if (state.status === "error") {
+      toast.danger("Error submitting feedback", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   return (
     <Modal>
@@ -55,6 +73,7 @@ export default function FeedbackForm({
                 </p>
                 <div className="flex flex-col gap-2">
                   <TextArea
+                    variant="secondary"
                     aria-label="Feedback"
                     placeholder="Ideas or suggestions to improve our product"
                     name="text"
@@ -70,10 +89,13 @@ export default function FeedbackForm({
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                <Button type="submit" className={"w-full"}>
-                  {isLoading && <Spinner size="sm" color="current" />}
-                  {isLoading ? "Submitting..." : "Submit Feedback"}
-                </Button>
+                <CancelButton onCancel={close} />
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Submit Feedback"
+                  loadingLabel="Submitting"
+                  className="w-full"
+                />
               </Modal.Footer>
             </form>
           </Modal.Dialog>

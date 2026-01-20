@@ -1,18 +1,16 @@
 "use client";
 
-import PasswordField from "@/components/forms/password-field";
+import PasswordField from "@/components/form-fields/password-field";
+import SubmitButton from "@/components/form-fields/submit-button";
 import { login } from "@/lib/auth/functions";
 import {
-  Button,
   Description,
   ErrorMessage,
   Fieldset,
   Input,
   Label,
-  Spinner,
   TextField,
 } from "@heroui/react";
-import { Icon } from "@iconify/react";
 import { useActionState } from "react";
 
 export function LoginForm() {
@@ -55,14 +53,12 @@ export function LoginForm() {
         <ErrorMessage>{state.formErrors[0]}</ErrorMessage>
       )}
 
-      <Button type="submit">
-        {isLoading ? "Logging in..." : "Log in"}
-        {isLoading ? (
-          <Spinner size="sm" color="current" />
-        ) : (
-          <Icon icon={`tabler:login-01`} />
-        )}
-      </Button>
+      <SubmitButton
+        isLoading={isLoading}
+        label="Log in"
+        loadingLabel="Logging in"
+        icon="tabler:login-01"
+      />
     </form>
   );
 }

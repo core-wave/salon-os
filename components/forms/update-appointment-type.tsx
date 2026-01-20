@@ -1,23 +1,24 @@
 "use client";
 
-import {
-  createAppointmentType,
-  updateAppointmentType,
-} from "@/lib/appointment-types/functions";
+import CancelButton from "@/components/form-fields/cancel-button";
+import SubmitButton from "@/components/form-fields/submit-button";
+import { updateAppointmentType } from "@/lib/appointment-types/functions";
 import { SelectAppointmentType } from "@/lib/db/types";
+import { clientEnv } from "@/lib/env/client";
 import {
   Button,
   ErrorMessage,
   Input,
   Label,
   Modal,
-  Spinner,
   Switch,
   TextArea,
   TextField,
+  toast,
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
 export default function UpdateAppointmentTypeForm({
@@ -43,11 +44,25 @@ export default function UpdateAppointmentTypeForm({
 
   const { open, close, isOpen, setOpen } = useOverlayState();
 
+  const router = useRouter();
+
   useEffect(() => {
     if (state.status === "success") {
+      toast("Appointment type updated", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state]);
+
+    if (state.status === "error") {
+      toast.danger("Error updating appointment type", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   return (
     <>
@@ -65,7 +80,11 @@ export default function UpdateAppointmentTypeForm({
             </Modal.Header>
             <form action={action}>
               <Modal.Body className="mt-4 flex flex-col gap-4 overflow-visible">
-                <TextField name="name" defaultValue={state.fieldValues?.name}>
+                <TextField
+                  variant="secondary"
+                  name="name"
+                  defaultValue={state.fieldValues?.name}
+                >
                   <Label>Name</Label>
                   <Input placeholder="Men's Haircut" />
                   {state.status === "error" && state.fieldErrors?.name && (
@@ -76,6 +95,7 @@ export default function UpdateAppointmentTypeForm({
                 </TextField>
 
                 <TextField
+                  variant="secondary"
                   name="description"
                   defaultValue={state.fieldValues?.description}
                 >
@@ -91,6 +111,7 @@ export default function UpdateAppointmentTypeForm({
 
                 <div className="flex gap-4">
                   <TextField
+                    variant="secondary"
                     name="durationMinutes"
                     defaultValue={state.fieldValues?.durationMinutes?.toString()}
                     fullWidth
@@ -106,6 +127,7 @@ export default function UpdateAppointmentTypeForm({
                   </TextField>
 
                   <TextField
+                    variant="secondary"
                     name="price"
                     defaultValue={state.fieldValues?.price?.toString()}
                     fullWidth
@@ -145,13 +167,12 @@ export default function UpdateAppointmentTypeForm({
                 />
               </Modal.Body>
               <Modal.Footer>
-                <Button onPress={close} variant="secondary">
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {isLoading && <Spinner size="sm" color="current" />}
-                  {isLoading ? "Saving..." : "Save"}
-                </Button>
+                <CancelButton onCancel={close} />
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Save"
+                  loadingLabel="Saving"
+                />
               </Modal.Footer>
             </form>
           </Modal.Dialog>

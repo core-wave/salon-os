@@ -1,14 +1,13 @@
 "use client";
 
-import PasswordField from "@/components/forms/password-field";
+import PasswordField from "@/components/form-fields/password-field";
+import SubmitButton from "@/components/form-fields/submit-button";
 import { signup } from "@/lib/auth/functions";
 import {
-  Button,
   Description,
   ErrorMessage,
   Input,
   Label,
-  Spinner,
   TextField,
   Fieldset,
 } from "@heroui/react";
@@ -90,14 +89,12 @@ export function SignupForm() {
           <ErrorMessage>{state.formErrors[0]}</ErrorMessage>
         )}
 
-        <Button type="submit">
-          {isLoading ? "Signing up..." : "Sign up"}
-          {isLoading ? (
-            <Spinner size="sm" color="current" />
-          ) : (
-            <Icon icon={`tabler:logout-01`} />
-          )}
-        </Button>
+        <SubmitButton
+          isLoading={isLoading}
+          label="Sign up"
+          loadingLabel="Signing up"
+          icon="tabler:logout-01"
+        />
       </form>
     );
 }

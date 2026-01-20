@@ -1,19 +1,23 @@
 "use client";
 
+import CancelButton from "@/components/form-fields/cancel-button";
+import SubmitButton from "@/components/form-fields/submit-button";
 import { createAppointment } from "@/lib/appointments/functions";
 import { SelectAppointmentType, SelectCustomer } from "@/lib/db/types";
+import { clientEnv } from "@/lib/env/client";
 import {
   Button,
   Label,
   ListBox,
   Modal,
   Select,
-  Spinner,
   TextArea,
   TextField,
+  toast,
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
 export default function CreateAppointmentForm({
@@ -35,11 +39,25 @@ export default function CreateAppointmentForm({
 
   const { open, close, isOpen, setOpen } = useOverlayState();
 
+  const router = useRouter();
+
   useEffect(() => {
     if (state.status === "success") {
+      toast("Appointment created", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state]);
+
+    if (state.status === "error") {
+      toast.danger("Error creating appointment", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   return (
     <>
@@ -59,6 +77,7 @@ export default function CreateAppointmentForm({
             <form action={action}>
               <Modal.Body className="mt-4 flex flex-col gap-4 overflow-visible">
                 <Select
+                  variant="secondary"
                   placeholder="Select one"
                   name="appointmentTypeId"
                   defaultValue={state.fieldValues?.appointmentTypeId}
@@ -81,6 +100,7 @@ export default function CreateAppointmentForm({
                 </Select>
 
                 <Select
+                  variant="secondary"
                   placeholder="Select one"
                   name="customerId"
                   defaultValue={state.fieldValues?.customerId}
@@ -102,19 +122,22 @@ export default function CreateAppointmentForm({
                   </Select.Popover>
                 </Select>
 
-                <TextField name="notes" defaultValue={state.fieldValues?.notes}>
+                <TextField
+                  variant="secondary"
+                  name="notes"
+                  defaultValue={state.fieldValues?.notes}
+                >
                   <Label>Notes</Label>
                   <TextArea placeholder="Optional" />
                 </TextField>
               </Modal.Body>
               <Modal.Footer>
-                <Button onPress={close} variant="ghost">
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {isLoading && <Spinner size="sm" color="current" />}
-                  {isLoading ? "Saving..." : "Save"}
-                </Button>
+                <CancelButton onCancel={close} />
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Save"
+                  loadingLabel="Saving"
+                />
               </Modal.Footer>
             </form>
           </Modal.Dialog>

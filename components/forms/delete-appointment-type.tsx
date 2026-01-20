@@ -1,8 +1,12 @@
 "use client";
 
+import CancelButton from "@/components/form-fields/cancel-button";
+import SubmitButton from "@/components/form-fields/submit-button";
 import { deleteAppointmentType } from "@/lib/appointment-types/functions";
-import { AlertDialog, Button, Spinner, useOverlayState } from "@heroui/react";
+import { clientEnv } from "@/lib/env/client";
+import { AlertDialog, Button, toast, useOverlayState } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
 export default function DeleteAppointmentTypeForm({
@@ -18,11 +22,25 @@ export default function DeleteAppointmentTypeForm({
 
   const { open, close, isOpen, setOpen } = useOverlayState();
 
+  const router = useRouter();
+
   useEffect(() => {
     if (state === "success") {
+      toast("Appointment type deleted", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state]);
+
+    if (state === "error") {
+      toast.danger("Error deleting appointment type", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   return (
     <>
@@ -45,18 +63,15 @@ export default function DeleteAppointmentTypeForm({
               </AlertDialog.Heading>
             </AlertDialog.Header>
             <AlertDialog.Footer>
-              <Button variant="tertiary" onPress={close}>
-                Cancel
-              </Button>
+              <CancelButton onCancel={close} />
               <form action={action}>
-                <Button type="submit" variant="danger" isDisabled={isLoading}>
-                  {isLoading ? (
-                    <Spinner size="sm" color="current" />
-                  ) : (
-                    <Icon icon={`tabler:trash`} />
-                  )}
-                  {isLoading ? "Deleting..." : "Delete"}
-                </Button>
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Delete"
+                  loadingLabel="Deleting"
+                  icon="tabler:trash"
+                  variant="danger"
+                />
               </form>
             </AlertDialog.Footer>
           </AlertDialog.Dialog>

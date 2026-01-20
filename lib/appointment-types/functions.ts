@@ -20,8 +20,6 @@ export async function deleteAppointmentType(
     return "error";
   }
 
-  revalidatePath("/");
-
   return "success";
 }
 

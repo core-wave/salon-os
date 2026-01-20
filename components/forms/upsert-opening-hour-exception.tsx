@@ -1,5 +1,8 @@
 "use client";
 
+import CancelButton from "@/components/form-fields/cancel-button";
+import SubmitButton from "@/components/form-fields/submit-button";
+import { clientEnv } from "@/lib/env/client";
 import { upsertOpeningHourException } from "@/lib/opening-hours/functions";
 import { timeStringToTime } from "@/lib/utils";
 import {
@@ -9,13 +12,14 @@ import {
   Input,
   Label,
   Modal,
-  Spinner,
   TextArea,
   TextField,
   TimeField,
+  toast,
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
 type Slot = {
@@ -62,11 +66,25 @@ export default function UpsertOpeningHourExceptionForm({
     }
   }, [isOpen, state.fieldValues?.slots, defaultSlots]);
 
+  const router = useRouter();
+
   useEffect(() => {
     if (state.status === "success") {
+      toast("Opening hours exception updated", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state, close]);
+
+    if (state.status === "error") {
+      toast.danger("Error updating opening hours exception", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   const addSlot = () => {
     setSlotsState((prev) => [...prev, { opensAt: "09:00", closesAt: "17:00" }]);
@@ -142,7 +160,7 @@ export default function UpsertOpeningHourExceptionForm({
                           defaultValue={timeStringToTime(slot.opensAt)}
                         >
                           <Label>Opens</Label>
-                          <DateInputGroup>
+                          <DateInputGroup variant="secondary">
                             <DateInputGroup.Input>
                               {(segment) => (
                                 <DateInputGroup.Segment segment={segment} />
@@ -156,7 +174,7 @@ export default function UpsertOpeningHourExceptionForm({
                           defaultValue={timeStringToTime(slot.closesAt)}
                         >
                           <Label>Closes</Label>
-                          <DateInputGroup>
+                          <DateInputGroup variant="secondary">
                             <DateInputGroup.Input>
                               {(segment) => (
                                 <DateInputGroup.Segment segment={segment} />
@@ -197,17 +215,13 @@ export default function UpsertOpeningHourExceptionForm({
               </Modal.Body>
 
               <Modal.Footer>
-                <Button type="button" variant="secondary" onPress={close}>
-                  Cancel
-                </Button>
-                <Button type="submit" isDisabled={isLoading}>
-                  {isLoading ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <Icon icon="tabler:save" />
-                  )}
-                  {isLoading ? "Saving..." : "Save"}
-                </Button>
+                <CancelButton onCancel={close} />
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Save"
+                  loadingLabel="Saving"
+                  icon="tabler:save"
+                />
               </Modal.Footer>
             </form>
           </Modal.Dialog>

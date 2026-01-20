@@ -57,7 +57,7 @@ export default async function DashboardLayout({
             <Dropdown.Trigger className="rounded-full">
               <Avatar variant="soft">
                 <Avatar.Image alt={user.name} src={user.image || ""} />
-                <Avatar.Fallback delayMs={600} color="accent">
+                <Avatar.Fallback color="accent">
                   {getInitials(user.name)}
                 </Avatar.Fallback>
               </Avatar>
@@ -67,7 +67,7 @@ export default async function DashboardLayout({
                 <div className="flex items-center gap-2">
                   <Avatar variant="soft">
                     <Avatar.Image alt={user.name} src={user.image || ""} />
-                    <Avatar.Fallback delayMs={600} color="accent">
+                    <Avatar.Fallback color="accent">
                       {getInitials(user.name)}
                     </Avatar.Fallback>
                   </Avatar>
@@ -85,24 +85,6 @@ export default async function DashboardLayout({
                 </Dropdown.Item>
                 <Dropdown.Item id="profile" textValue="Profile">
                   <Label>Profile</Label>
-                </Dropdown.Item>
-                <Dropdown.Item id="settings" textValue="Settings">
-                  <div className="flex w-full items-center justify-between gap-2">
-                    <Label>Settings</Label>
-                    {/* <Gear className="size-3.5 text-muted" /> */}
-                  </div>
-                </Dropdown.Item>
-                <Dropdown.Item id="new-project" textValue="New project">
-                  <div className="flex w-full items-center justify-between gap-2">
-                    <Label>Create Team</Label>
-                    {/* <Persons className="size-3.5 text-muted" /> */}
-                  </div>
-                </Dropdown.Item>
-                <Dropdown.Item id="logout" textValue="Logout" variant="danger">
-                  <div className="flex w-full items-center justify-between gap-2">
-                    <Label>Log Out</Label>
-                    {/* <ArrowRightFromSquare className="size-3.5 text-danger" /> */}
-                  </div>
                 </Dropdown.Item>
                 <LogoutForm />
               </Dropdown.Menu>

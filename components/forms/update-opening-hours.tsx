@@ -1,18 +1,22 @@
 "use client";
 
+import CancelButton from "@/components/form-fields/cancel-button";
+import SubmitButton from "@/components/form-fields/submit-button";
 import { SelectOpeningHourSlot } from "@/lib/db/types";
+import { clientEnv } from "@/lib/env/client";
 import { updateOpeningHours } from "@/lib/opening-hours/functions";
 import { timeStringToTime } from "@/lib/utils";
 import {
   Button,
   Label,
   Modal,
-  Spinner,
   useOverlayState,
   TimeField,
   DateInputGroup,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
 type Slot = {
@@ -50,11 +54,25 @@ export default function UpdateOpeningHoursForm({
   }, [isOpen, state.fieldValues?.slots, defaultSlots]);
 
   // Close on success
+  const router = useRouter();
+
   useEffect(() => {
     if (state.status === "success") {
+      toast("Opening hours updated", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state]);
+
+    if (state.status === "error") {
+      toast.danger("Error updating opening hours", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   const addSlot = () => {
     setSlotsState((prev) => [...prev, { opensAt: "09:00", closesAt: "17:00" }]);
@@ -96,7 +114,7 @@ export default function UpdateOpeningHoursForm({
                         defaultValue={timeStringToTime(slot.opensAt)}
                       >
                         <Label>Opens</Label>
-                        <DateInputGroup>
+                        <DateInputGroup variant="secondary">
                           <DateInputGroup.Input>
                             {(segment) => (
                               <DateInputGroup.Segment segment={segment} />
@@ -110,7 +128,7 @@ export default function UpdateOpeningHoursForm({
                         defaultValue={timeStringToTime(slot.closesAt)}
                       >
                         <Label>Closes</Label>
-                        <DateInputGroup>
+                        <DateInputGroup variant="secondary">
                           <DateInputGroup.Input>
                             {(segment) => (
                               <DateInputGroup.Segment segment={segment} />
@@ -151,17 +169,13 @@ export default function UpdateOpeningHoursForm({
               </Modal.Body>
 
               <Modal.Footer>
-                <Button type="button" variant="secondary" onPress={close}>
-                  Cancel
-                </Button>
-                <Button type="submit" isDisabled={isLoading}>
-                  {isLoading ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <Icon icon={`tabler:save`} />
-                  )}
-                  {isLoading ? "Saving..." : "Save"}
-                </Button>
+                <CancelButton onCancel={close} />
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Save"
+                  loadingLabel="Saving"
+                  icon="tabler:save"
+                />
               </Modal.Footer>
             </form>
           </Modal.Dialog>

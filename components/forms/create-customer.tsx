@@ -1,18 +1,22 @@
 "use client";
 
+import CancelButton from "@/components/form-fields/cancel-button";
+import SubmitButton from "@/components/form-fields/submit-button";
 import { createCustomer } from "@/lib/customers/functions";
+import { clientEnv } from "@/lib/env/client";
 import {
   Button,
   ErrorMessage,
   Input,
   Label,
   Modal,
-  Spinner,
   TextArea,
   TextField,
+  toast,
   useOverlayState,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
 export default function CreateCustomerForm({
@@ -28,11 +32,25 @@ export default function CreateCustomerForm({
 
   const { open, close, isOpen, setOpen } = useOverlayState();
 
+  const router = useRouter();
+
   useEffect(() => {
     if (state.status === "success") {
+      toast("Customer created", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+        indicator: <Icon icon="tabler:check" />,
+      });
+
       close();
+      router.refresh();
     }
-  }, [state]);
+
+    if (state.status === "error") {
+      toast.danger("Error creating customer", {
+        timeout: clientEnv.NEXT_PUBLIC_TOASTER_TIMEOUT,
+      });
+    }
+  }, [state, close, router]);
 
   return (
     <>
@@ -51,7 +69,11 @@ export default function CreateCustomerForm({
             </Modal.Header>
             <form action={action}>
               <Modal.Body className="mt-4 flex flex-col gap-4 overflow-visible">
-                <TextField name="name" defaultValue={state.fieldValues?.name}>
+                <TextField
+                  variant="secondary"
+                  name="name"
+                  defaultValue={state.fieldValues?.name}
+                >
                   <Label>Name</Label>
                   <Input placeholder="Alex Johnson" />
                   {state.status === "error" && state.fieldErrors?.name && (
@@ -61,7 +83,11 @@ export default function CreateCustomerForm({
                   )}
                 </TextField>
 
-                <TextField name="email" defaultValue={state.fieldValues?.email}>
+                <TextField
+                  variant="secondary"
+                  name="email"
+                  defaultValue={state.fieldValues?.email}
+                >
                   <Label>Email</Label>
                   <Input placeholder="alex@example.com" />
                   {state.status === "error" && state.fieldErrors?.email && (
@@ -71,7 +97,11 @@ export default function CreateCustomerForm({
                   )}
                 </TextField>
 
-                <TextField name="phone" defaultValue={state.fieldValues?.phone}>
+                <TextField
+                  variant="secondary"
+                  name="phone"
+                  defaultValue={state.fieldValues?.phone}
+                >
                   <Label>Phone</Label>
                   <Input placeholder="+1 555 123 4567" />
                   {state.status === "error" && state.fieldErrors?.phone && (
@@ -81,7 +111,11 @@ export default function CreateCustomerForm({
                   )}
                 </TextField>
 
-                <TextField name="notes" defaultValue={state.fieldValues?.notes}>
+                <TextField
+                  variant="secondary"
+                  name="notes"
+                  defaultValue={state.fieldValues?.notes}
+                >
                   <Label>Notes</Label>
                   <TextArea placeholder="Allergic to certain products" />
                   {state.status === "error" && state.fieldErrors?.notes && (
@@ -92,13 +126,12 @@ export default function CreateCustomerForm({
                 </TextField>
               </Modal.Body>
               <Modal.Footer>
-                <Button onPress={close} variant="secondary">
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {isLoading && <Spinner size="sm" color="current" />}
-                  {isLoading ? "Saving..." : "Save"}
-                </Button>
+                <CancelButton onCancel={close} />
+                <SubmitButton
+                  isLoading={isLoading}
+                  label="Save"
+                  loadingLabel="Saving"
+                />
               </Modal.Footer>
             </form>
           </Modal.Dialog>
