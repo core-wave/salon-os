@@ -47,9 +47,6 @@ export default async function DashboardLayout({
           <div className="flex-1"></div>
           <div className="flex">
             <FeedbackForm organization={org.data} user={user} />
-            <Button variant="ghost" isIconOnly>
-              <Icon icon={`tabler:bell`} />
-            </Button>
           </div>
 
           <Separator orientation="vertical" className="mr-3" />

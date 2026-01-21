@@ -12,7 +12,7 @@ export default function LandingPage() {
         <section className="my-14 mt-16 flex flex-col items-center justify-center gap-6">
           {/* <CenteredNavbar /> */}
           <Button className="bg-surface text-foreground shadow-surface">
-            New onboarding experience
+            See our plans
             <Icon icon="solar:arrow-right-linear" />
           </Button>
           <h1 className="text-foreground text-center text-[clamp(2.125rem,1.142rem+3.659vw,4rem)] leading-none font-bold">
@@ -27,7 +27,7 @@ export default function LandingPage() {
               href={`/auth/signup`}
               className={cn(
                 buttonVariants({ variant: "secondary" }),
-                "bg-accent-soft"
+                "bg-accent-soft",
               )}
             >
               Get Started
@@ -36,7 +36,7 @@ export default function LandingPage() {
               href={`/auth/login`}
               className={cn(buttonVariants({ variant: "primary" }))}
             >
-              See our plans
+              Sign In
               <Icon icon="solar:arrow-right-linear" />
             </Link>
           </div>
