@@ -11,7 +11,15 @@ import {
   openingHourExceptionSlots,
   customers,
 } from "../db/schema";
-import { and, eq, asc, desc, inArray } from "drizzle-orm";
+import { and, eq, asc, desc, inArray, gte, lt } from "drizzle-orm";
+import { zonedTimeToUtc, utcToZonedTime, format } from "date-fns-tz";
+import {
+  timeToMinutes,
+  minutesToTime,
+  addMinutesToTime,
+  doTimesOverlap,
+} from "../utils";
+import { TimeSlot } from "../availability/types";
 import {
   InsertAppointment,
   InsertAppointmentType,
@@ -718,6 +726,266 @@ class CLocation {
     } catch (error) {
       console.error("error deleting opening hour exception:", error);
       return false;
+    }
+  }
+
+  // Availability Calculation
+
+  /**
+   * Get opening time slots for a specific date
+   * Checks exceptions first, then falls back to regular opening hours
+   * @returns Array of { opensAt, closesAt } time strings, or null if closed/no hours
+   */
+  private async getOpeningSlotsForDate(
+    dateString: string,
+    dayOfWeek: number,
+  ): Promise<{ opensAt: string; closesAt: string }[] | null> {
+    try {
+      // Check for exception first
+      const exception = await db.query.openingHourExceptions.findFirst({
+        where: and(
+          eq(openingHourExceptions.locationId, this.data.id),
+          eq(openingHourExceptions.date, dateString),
+        ),
+        with: {
+          slots: {
+            orderBy: [asc(openingHourExceptionSlots.opensAt)],
+          },
+        },
+      });
+
+      if (exception) {
+        if (exception.isClosed) {
+          return null; // Location closed on this date
+        }
+        return exception.slots.map((slot) => ({
+          opensAt: slot.opensAt,
+          closesAt: slot.closesAt,
+        }));
+      }
+
+      // Fall back to regular opening hours
+      const regularHours = await db.query.openingHours.findFirst({
+        where: and(
+          eq(openingHours.locationId, this.data.id),
+          eq(openingHours.dayOfWeek, dayOfWeek),
+        ),
+        with: {
+          slots: {
+            orderBy: [asc(openingHourSlots.opensAt)],
+          },
+        },
+      });
+
+      if (!regularHours || regularHours.slots.length === 0) {
+        return null; // No hours defined for this day
+      }
+
+      return regularHours.slots.map((slot) => ({
+        opensAt: slot.opensAt,
+        closesAt: slot.closesAt,
+      }));
+    } catch (error) {
+      console.error("error getting opening slots for date:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Get existing appointments for a specific date with their calculated end times
+   * Only includes "Planned" appointments
+   */
+  private async getAppointmentBlocksForDate(
+    dateString: string,
+  ): Promise<{ startsAt: string; endsAt: string }[]> {
+    try {
+      const timeZone = this.data.timeZone;
+
+      // Parse the date string in the location's timezone
+      const dateObj = new Date(dateString + "T00:00:00");
+      const dayStart = zonedTimeToUtc(dateObj, timeZone);
+
+      // Create next day for upper bound (exclusive)
+      const nextDayObj = new Date(dateObj);
+      nextDayObj.setDate(nextDayObj.getDate() + 1);
+      const dayEnd = zonedTimeToUtc(nextDayObj, timeZone);
+
+      const existingAppointments = await db
+        .select({
+          startsAt: appointments.startsAt,
+          durationMinutes: appointmentTypes.durationMinutes,
+        })
+        .from(appointments)
+        .innerJoin(
+          appointmentTypes,
+          eq(appointments.appointmentTypeId, appointmentTypes.id),
+        )
+        .where(
+          and(
+            eq(appointments.locationId, this.data.id),
+            eq(appointments.status, "Planned"),
+            gte(appointments.startsAt, dayStart),
+            lt(appointments.startsAt, dayEnd),
+          ),
+        );
+
+      // Convert to location timezone and calculate end times
+      return existingAppointments.map((appt) => {
+        const startInTz = utcToZonedTime(appt.startsAt, timeZone);
+        const startTime = format(startInTz, "HH:mm:ss", { timeZone });
+        const endTime = addMinutesToTime(startTime, appt.durationMinutes);
+        return {
+          startsAt: startTime,
+          endsAt: endTime,
+        };
+      });
+    } catch (error) {
+      console.error("error getting appointment blocks for date:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Generate candidate time slots at 15-minute intervals
+   * Only generates slots where the appointment can complete before closing
+   */
+  private generateCandidateSlots(
+    dateString: string,
+    openingSlots: { opensAt: string; closesAt: string }[],
+    durationMinutes: number,
+  ): { startsAt: string; endsAt: string }[] {
+    const candidates: { startsAt: string; endsAt: string }[] = [];
+
+    for (const period of openingSlots) {
+      const startMinutes = timeToMinutes(period.opensAt);
+      const endMinutes = timeToMinutes(period.closesAt);
+
+      // Generate slots at 15-minute intervals
+      for (
+        let slotStart = startMinutes;
+        slotStart < endMinutes;
+        slotStart += 15
+      ) {
+        const slotEnd = slotStart + durationMinutes;
+
+        // Only include if appointment can complete before closing
+        if (slotEnd <= endMinutes) {
+          candidates.push({
+            startsAt: minutesToTime(slotStart),
+            endsAt: minutesToTime(slotEnd),
+          });
+        }
+      }
+    }
+
+    return candidates;
+  }
+
+  /**
+   * Filter out time slots that conflict with existing appointments
+   */
+  private filterConflictingSlots(
+    candidates: { startsAt: string; endsAt: string }[],
+    appointments: { startsAt: string; endsAt: string }[],
+  ): { startsAt: string; endsAt: string }[] {
+    return candidates.filter((candidate) => {
+      // Check if this slot overlaps with any existing appointment
+      for (const appt of appointments) {
+        if (
+          doTimesOverlap(
+            candidate.startsAt,
+            candidate.endsAt,
+            appt.startsAt,
+            appt.endsAt,
+          )
+        ) {
+          return false; // Conflict found, exclude this slot
+        }
+      }
+      return true; // No conflicts
+    });
+  }
+
+  /**
+   * Get available time slots for booking an appointment on a specific date
+   * @param dateString Date in YYYY-MM-DD format
+   * @param appointmentTypeId ID of the appointment type to book
+   * @returns Array of available time slots with ISO timestamps and display times
+   */
+  public async getAvailableSlots(
+    dateString: string,
+    appointmentTypeId: string,
+  ): Promise<TimeSlot[]> {
+    try {
+      // Get appointment type to know the duration
+      const apptType = await db.query.appointmentTypes.findFirst({
+        where: and(
+          eq(appointmentTypes.id, appointmentTypeId),
+          eq(appointmentTypes.locationId, this.data.id),
+        ),
+      });
+
+      if (!apptType) {
+        console.error("appointment type not found");
+        return [];
+      }
+
+      // Parse date and get day of week (0 = Sunday)
+      const date = new Date(dateString + "T00:00:00");
+      const dayOfWeek = date.getDay();
+
+      // Step 1: Get opening hours for this date
+      const openingSlots = await this.getOpeningSlotsForDate(
+        dateString,
+        dayOfWeek,
+      );
+
+      if (!openingSlots) {
+        return []; // Location closed or no hours defined
+      }
+
+      // Step 2: Get existing appointments
+      const existingAppointments =
+        await this.getAppointmentBlocksForDate(dateString);
+
+      // Step 3: Generate candidate slots
+      const candidates = this.generateCandidateSlots(
+        dateString,
+        openingSlots,
+        apptType.durationMinutes,
+      );
+
+      // Step 4: Filter out conflicting slots
+      const availableSlots = this.filterConflictingSlots(
+        candidates,
+        existingAppointments,
+      );
+
+      // Step 5: Format and return
+      const timeZone = this.data.timeZone;
+      return availableSlots.map((slot) => {
+        // Create ISO timestamp in location timezone
+        const startDateTime = zonedTimeToUtc(
+          new Date(`${dateString}T${slot.startsAt}`),
+          timeZone,
+        );
+        const endDateTime = zonedTimeToUtc(
+          new Date(`${dateString}T${slot.endsAt}`),
+          timeZone,
+        );
+
+        return {
+          startsAt: startDateTime.toISOString(),
+          endsAt: endDateTime.toISOString(),
+          display: {
+            startTime: slot.startsAt.substring(0, 5), // "HH:MM"
+            endTime: slot.endsAt.substring(0, 5), // "HH:MM"
+          },
+        };
+      });
+    } catch (error) {
+      console.error("error getting available slots:", error);
+      return [];
     }
   }
 }

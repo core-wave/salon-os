@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   doublePrecision,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 import { v7 as uuidv7 } from "uuid";
 
@@ -217,4 +218,36 @@ export const customers = pgTable(
       .on(table.organizationId, table.phone)
       .where(isNotNull(table.phone)),
   ],
+);
+
+// Relations
+export const openingHoursRelations = relations(openingHours, ({ many }) => ({
+  slots: many(openingHourSlots),
+}));
+
+export const openingHourSlotsRelations = relations(
+  openingHourSlots,
+  ({ one }) => ({
+    openingHour: one(openingHours, {
+      fields: [openingHourSlots.openingHourId],
+      references: [openingHours.id],
+    }),
+  }),
+);
+
+export const openingHourExceptionsRelations = relations(
+  openingHourExceptions,
+  ({ many }) => ({
+    slots: many(openingHourExceptionSlots),
+  }),
+);
+
+export const openingHourExceptionSlotsRelations = relations(
+  openingHourExceptionSlots,
+  ({ one }) => ({
+    exception: one(openingHourExceptions, {
+      fields: [openingHourExceptionSlots.exceptionId],
+      references: [openingHourExceptions.id],
+    }),
+  }),
 );

@@ -5,7 +5,6 @@ import { FormState } from "../types";
 import { AppointmentFormProps, appointmentFormSchema } from "./schemas";
 import { salonCore } from "../core";
 import { revalidatePath } from "next/cache";
-import { nextQuarterHour } from "../utils";
 
 export async function createAppointment(
   locationSlug: string,
@@ -17,11 +16,23 @@ export async function createAppointment(
 
   console.log(raw);
 
+  // Parse startsAt from ISO string
+  const startsAtString = formData.get("startsAt") as string;
+  let startsAtDate: Date | undefined;
+
+  if (startsAtString) {
+    startsAtDate = new Date(startsAtString);
+    // Validate the date is valid
+    if (isNaN(startsAtDate.getTime())) {
+      startsAtDate = undefined;
+    }
+  }
+
   const rawData: AppointmentFormProps = {
     appointmentTypeId: formData.get("appointmentTypeId") as string,
     customerId: formData.get("customerId") as string,
-    startsAt: nextQuarterHour(), // hardcoded, remove later
-    notes: formData.get("notes") as string,
+    startsAt: startsAtDate as Date,
+    notes: (formData.get("notes") as string) || "",
   };
 
   console.log("raw", rawData);
