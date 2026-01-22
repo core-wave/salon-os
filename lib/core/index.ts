@@ -10,6 +10,7 @@ import {
   openingHourExceptions,
   openingHourExceptionSlots,
   customers,
+  organization,
 } from "../db/schema";
 import { and, eq, asc, desc, inArray, gte, lt } from "drizzle-orm";
 import { zonedTimeToUtc, utcToZonedTime, format } from "date-fns-tz";
@@ -115,6 +116,7 @@ class Core {
 
       return new CLocation({
         id: res.id,
+        organizationId: res.organizationId,
         createdAt: res.createdAt,
         name: res.name,
         slug: res.slug,
@@ -135,6 +137,60 @@ class Core {
       });
     } catch (error) {
       console.error("error getting location:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Get a location by organization slug and location slug (no auth required)
+   * Used for public booking pages
+   */
+  public async getPublicLocation(
+    orgSlug: string,
+    locationSlug: string,
+  ): Promise<CLocation | null> {
+    try {
+      const [res] = await db
+        .select({
+          location: locations,
+          orgName: organization.name,
+        })
+        .from(locations)
+        .innerJoin(organization, eq(locations.organizationId, organization.id))
+        .where(
+          and(
+            eq(organization.slug, orgSlug),
+            eq(locations.slug, locationSlug),
+            eq(locations.isActive, true),
+          ),
+        )
+        .limit(1);
+
+      if (!res) return null;
+
+      return new CLocation({
+        id: res.location.id,
+        organizationId: res.location.organizationId,
+        createdAt: res.location.createdAt,
+        name: res.location.name,
+        slug: res.location.slug,
+        isActive: res.location.isActive,
+        phone: res.location.phone,
+        formattedAddress: res.location.formattedAddress,
+        placeId: res.location.placeId,
+        googleMapsUri: res.location.googleMapsUri,
+        streetName: res.location.streetName,
+        streetNumber: res.location.streetNumber,
+        postalCode: res.location.postalCode,
+        city: res.location.city,
+        administrativeArea: res.location.administrativeArea,
+        countryCode: res.location.countryCode,
+        lat: res.location.lat,
+        lng: res.location.lng,
+        timeZone: res.location.timeZone,
+      });
+    } catch (error) {
+      console.error("error getting public location:", error);
       return null;
     }
   }
@@ -201,6 +257,7 @@ class COrganization {
 
       return res.map((x) => ({
         id: x.id,
+        organizationId: x.organizationId,
         createdAt: x.createdAt,
         name: x.name,
         slug: x.slug,

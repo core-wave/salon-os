@@ -30,10 +30,7 @@ export type InsertLocation = Omit<
   "id" | "createdAt" | "isActive" | "organizationId"
 >;
 
-export type SelectLocation = Omit<
-  typeof locations.$inferSelect,
-  "organizationId"
->;
+export type SelectLocation = typeof locations.$inferSelect;
 
 // Opening hours
 
