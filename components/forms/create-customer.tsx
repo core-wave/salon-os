@@ -21,8 +21,10 @@ import { useActionState, useEffect } from "react";
 
 export default function CreateCustomerForm({
   organizationSlug,
+  variant = "primary",
 }: {
   organizationSlug: string;
+  variant?: "primary" | "secondary" | "tertiary";
 }) {
   const formAction = createCustomer.bind(null, organizationSlug);
 
@@ -54,7 +56,7 @@ export default function CreateCustomerForm({
 
   return (
     <>
-      <Button onPress={open}>
+      <Button variant={variant} onPress={open}>
         <Icon icon={`tabler:plus`} />
         New Customer
       </Button>

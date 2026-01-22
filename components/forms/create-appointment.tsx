@@ -29,11 +29,13 @@ export default function CreateAppointmentForm({
   currency,
   appointmentTypes,
   customers,
+  variant = "primary",
 }: {
   locationSlug: string;
   currency: string;
   appointmentTypes: SelectAppointmentType[];
   customers: SelectCustomer[];
+  variant?: "primary" | "secondary" | "tertiary";
 }) {
   const formAction = createAppointment.bind(null, locationSlug, currency);
 
@@ -182,7 +184,7 @@ export default function CreateAppointmentForm({
 
   return (
     <>
-      <Button onPress={open}>
+      <Button variant={variant} onPress={open}>
         <Icon icon={`tabler:plus`} />
         New Appointment
       </Button>
