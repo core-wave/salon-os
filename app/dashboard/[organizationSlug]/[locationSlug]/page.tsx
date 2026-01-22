@@ -3,9 +3,10 @@ import CreateAppointmentForm from "@/components/forms/create-appointment";
 import CreateCustomerForm from "@/components/forms/create-customer";
 import DashboardPageHeader from "@/components/layout/dashboard-page-header";
 import { salonCore } from "@/lib/core";
-import { Card } from "@heroui/react";
+import { buttonVariants, Card } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { utcToZonedTime } from "date-fns-tz";
 import { isSameDay } from "date-fns";
 
@@ -67,6 +68,14 @@ export default async function OverviewPage({
         description="Welcome back! Here's what's happening today"
       >
         <div className="flex gap-2 w-full sm:w-auto">
+          <Link
+            href={`/b/${organizationSlug}/${locationSlug}`}
+            target="_blank"
+            className={buttonVariants({ variant: "tertiary" })}
+          >
+            <Icon icon="tabler:external-link" />
+            Booking Page
+          </Link>
           <CreateCustomerForm
             organizationSlug={org.data.slug}
             variant="tertiary"
