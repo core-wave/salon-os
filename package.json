@@ -16,7 +16,7 @@
     "@heroui/styles": "^3.0.0-beta.4",
     "@iconify-json/tabler": "^1.2.26",
     "@internationalized/date": "^3.10.1",
-    "@react-email/components": "^1.0.3",
+    "@react-email/components": "^1.0.6",
     "@react-email/render": "^2.0.1",
     "better-auth": "^1.4.10",
     "date-fns-tz": "^2.0.0",
