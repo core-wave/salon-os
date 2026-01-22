@@ -917,6 +917,8 @@ class CLocation {
     appointmentTypeId: string,
   ): Promise<TimeSlot[]> {
     try {
+      console.log("[CLocation.getAvailableSlots] dateString:", dateString, "appointmentTypeId:", appointmentTypeId);
+
       // Get appointment type to know the duration
       const apptType = await db.query.appointmentTypes.findFirst({
         where: and(
@@ -926,13 +928,17 @@ class CLocation {
       });
 
       if (!apptType) {
-        console.error("appointment type not found");
+        console.error("[CLocation.getAvailableSlots] appointment type not found for id:", appointmentTypeId, "locationId:", this.data.id);
         return [];
       }
+
+      console.log("[CLocation.getAvailableSlots] apptType found:", apptType.name, "duration:", apptType.durationMinutes);
 
       // Parse date and get day of week (0 = Sunday)
       const date = new Date(dateString + "T00:00:00");
       const dayOfWeek = date.getDay();
+
+      console.log("[CLocation.getAvailableSlots] dayOfWeek:", dayOfWeek, "date:", date.toString());
 
       // Step 1: Get opening hours for this date
       const openingSlots = await this.getOpeningSlotsForDate(
@@ -940,7 +946,10 @@ class CLocation {
         dayOfWeek,
       );
 
+      console.log("[CLocation.getAvailableSlots] openingSlots:", openingSlots);
+
       if (!openingSlots) {
+        console.log("[CLocation.getAvailableSlots] no opening slots - location closed or no hours");
         return []; // Location closed or no hours defined
       }
 

@@ -15,17 +15,29 @@ export async function getAvailableSlots(
   dateString: string,
   appointmentTypeId: string,
 ): Promise<TimeSlot[]> {
+  console.log("[getAvailableSlots] called with:", {
+    locationSlug,
+    dateString,
+    appointmentTypeId,
+  });
+
   try {
     const location = await salonCore.getLocationBySlug(locationSlug);
 
     if (!location) {
-      console.error("location not found:", locationSlug);
+      console.error("[getAvailableSlots] location not found:", locationSlug);
       return [];
     }
 
-    return await location.getAvailableSlots(dateString, appointmentTypeId);
+    console.log("[getAvailableSlots] location found:", location.data.name);
+
+    const slots = await location.getAvailableSlots(dateString, appointmentTypeId);
+
+    console.log("[getAvailableSlots] returning", slots.length, "slots");
+
+    return slots;
   } catch (error) {
-    console.error("error getting available slots:", error);
+    console.error("[getAvailableSlots] error:", error);
     return [];
   }
 }

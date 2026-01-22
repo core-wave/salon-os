@@ -2,6 +2,44 @@
 
 Appointment scheduling platform for solo professionals and small businesses. Mobile-first, simple, no-frills.
 
+## Working Together
+
+- Be honest and direct. Call out bad ideas and mistakes - no sycophancy, no "you're absolutely right" - just honest technical judgment.
+- Ask for clarification rather than making assumptions.
+- Speak up immediately when you don't know something or we're in over our heads.
+- When you disagree with an approach, push back with specific technical reasons. If it's just a gut feeling, say so.
+- Be skeptical of comments claiming "not supported" - verify with actual evidence before accepting.
+- Investigate context and requirements BEFORE attempting fixes.
+- If you're having trouble, stop and ask for help.
+
+## Design Principles
+
+- **YAGNI wins.** The best code is no code. Don't add features we don't need right now. When YAGNI conflicts with extensibility, YAGNI wins.
+- **Simplicity over cleverness.** Strongly prefer simple, clean, maintainable solutions over clever or complex ones. Readability and maintainability are primary concerns, even at the cost of conciseness or performance.
+- **Good naming matters.** Name functions, variables, classes so that their full utility is obvious. Reusable, generic things should have reusable generic names.
+- **Fix at the source.** Always apply the proper fix at the source rather than workarounds in multiple places.
+- **Search before writing.** Before writing new code, search for existing patterns, verify types/interfaces by examining similar code, and check actual usage.
+
+### Naming and Comments
+
+Names must tell what code does, not how it's implemented or its history:
+- NEVER use implementation details in names (e.g., "ZodValidator", "JSONParser")
+- NEVER use temporal/historical context (e.g., "NewAPI", "LegacyHandler")
+- NEVER use pattern names unless they add clarity (prefer "Tool" over "ToolFactory")
+
+Good names tell a story about the domain:
+- `Tool` not `AbstractToolInterface`
+- `Registry` not `ToolRegistryManager`
+- `execute()` not `executeToolWithValidation()`
+
+Comments must describe what the code does NOW, not:
+- What it used to do
+- How it was refactored
+- What framework/library it uses internally
+- Why it's better than some previous version
+
+If you catch yourself writing "new", "old", "legacy", "wrapper", or implementation details in names or comments, stop and find a better name.
+
 ## Quick Reference
 
 ```bash
@@ -190,6 +228,40 @@ import { auth } from "@/lib/auth";
 - Functions/variables: camelCase (`sendVerificationEmail`)
 - Database tables: snake_case (`appointment_types`)
 - TypeScript types: PascalCase (`AppointmentType`)
+
+### Code Quality
+
+- Make the SMALLEST reasonable changes to achieve the desired outcome.
+- NEVER make code changes unrelated to your current task.
+- Work hard to reduce code duplication, even if refactoring takes extra effort.
+- Never throw away or rewrite implementations without explicit permission.
+- Match the style and formatting of surrounding code. Consistency within a file trumps external standards.
+- Never remove code comments unless you can prove they are actively false.
+- Ask about specific use cases and context BEFORE implementing features.
+- When converting or replacing code, clarify whether old code should be removed or kept.
+
+### Testing
+
+- When fixing a bug, start by writing a test that proves the issue exists and is reproducible.
+- Write unit tests for complex, self-contained logic with minimal external dependencies.
+- Write integration tests to prove bug fixes work or new functionality behaves correctly.
+
+### Error Handling
+
+- Synchronous code (user waiting): fail fast. Retries don't help when someone is waiting.
+- Async/background jobs: retries are acceptable, exponential backoff where reasonable.
+
+### Version Control
+
+- Read-only git commands are allowed without permission (`git blame`, `git log`, `git diff`, `git status`, `git show`).
+- All write operations (commit, push, checkout, reset, etc.) require explicit approval.
+
+### Task Tracking
+
+- Use TodoWrite to track multi-step tasks and give visibility into progress.
+- Mark tasks as in_progress BEFORE starting work, and completed IMMEDIATELY after finishing.
+- When you notice unrelated issues, document them rather than fixing immediately.
+- When you have independent exploration tasks, spawn multiple sub-agents in parallel rather than running sequentially.
 
 ## Environment Variables
 

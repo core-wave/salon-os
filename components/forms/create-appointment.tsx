@@ -22,7 +22,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 export default function CreateAppointmentForm({
   locationSlug,
@@ -51,6 +51,79 @@ export default function CreateAppointmentForm({
     useState<string>("");
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Workaround for HeroUI v3 beta not calling onChange - poll for value changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let pollInterval: NodeJS.Timeout | null = null;
+    let lastApptTypeValue = "";
+    let lastDateValue = "";
+
+    // Use timeout to ensure DOM is ready after modal animation
+    const timeoutId = setTimeout(() => {
+      if (!formRef.current) return;
+
+      // HeroUI Select uses hidden input elements, not native select
+      // Try multiple selectors as HeroUI structure may vary
+      let appointmentTypeInput: HTMLInputElement | HTMLSelectElement | null = formRef.current.querySelector(
+        'input[name="appointmentTypeId"]'
+      );
+
+      // Fallback: try select element (some versions may use this)
+      if (!appointmentTypeInput) {
+        appointmentTypeInput = formRef.current.querySelector(
+          'select[name="appointmentTypeId"]'
+        );
+      }
+
+      const dateInput = formRef.current.querySelector(
+        'input[name="date"]'
+      ) as HTMLInputElement | null;
+
+      // Debug: Log what elements we found and dump all form inputs
+      const allInputs = formRef.current.querySelectorAll('input, select');
+      console.log("[Polling] All form inputs:", Array.from(allInputs).map(el => ({
+        tag: el.tagName,
+        name: (el as HTMLInputElement).name,
+        type: (el as HTMLInputElement).type,
+        value: (el as HTMLInputElement).value?.substring(0, 50),
+      })));
+      console.log("[Polling] Form elements found:", {
+        appointmentTypeInput: appointmentTypeInput ? `found (${appointmentTypeInput.tagName})` : "NOT FOUND",
+        dateInput: dateInput ? "found" : "NOT FOUND",
+      });
+
+      // Poll for changes every 200ms
+      pollInterval = setInterval(() => {
+        // Check appointment type
+        if (appointmentTypeInput) {
+          const currentApptTypeValue = appointmentTypeInput.value;
+          if (currentApptTypeValue && currentApptTypeValue !== lastApptTypeValue) {
+            console.log("[Polling] Appointment type changed:", currentApptTypeValue);
+            lastApptTypeValue = currentApptTypeValue;
+            setSelectedAppointmentTypeId(currentApptTypeValue);
+          }
+        }
+
+        // Check date
+        if (dateInput) {
+          const currentDateValue = dateInput.value;
+          if (currentDateValue && currentDateValue !== lastDateValue) {
+            console.log("[Polling] Date changed:", currentDateValue);
+            lastDateValue = currentDateValue;
+            setSelectedDate(currentDateValue);
+          }
+        }
+      }, 200);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [isOpen]);
 
   // Reset form state when modal closes
   useEffect(() => {
@@ -63,14 +136,22 @@ export default function CreateAppointmentForm({
 
   // Fetch available slots when date and appointment type change
   useEffect(() => {
+    console.log("[CreateAppointmentForm] useEffect triggered", {
+      selectedDate,
+      selectedAppointmentTypeId,
+      locationSlug,
+    });
+
     if (selectedDate && selectedAppointmentTypeId) {
+      console.log("[CreateAppointmentForm] fetching slots...");
       setLoadingSlots(true);
       getAvailableSlots(locationSlug, selectedDate, selectedAppointmentTypeId)
         .then((slots) => {
+          console.log("[CreateAppointmentForm] received slots:", slots.length);
           setAvailableSlots(slots);
         })
         .catch((error) => {
-          console.error("Error fetching slots:", error);
+          console.error("[CreateAppointmentForm] Error fetching slots:", error);
           setAvailableSlots([]);
         })
         .finally(() => {
@@ -114,18 +195,16 @@ export default function CreateAppointmentForm({
                 Enter the details to update your appointment type
               </p> */}
             </Modal.Header>
-            <form action={action}>
+            <form ref={formRef} action={action}>
               <Modal.Body className="mt-4 flex flex-col gap-4 overflow-visible">
                 <Select
                   variant="secondary"
                   placeholder="Select one"
                   name="appointmentTypeId"
-                  defaultValue={state.fieldValues?.appointmentTypeId}
-                  onSelectionChange={(keys) => {
-                    if (keys && keys !== "all") {
-                      const keysArray = [...(keys as unknown as Set<string>)];
-                      setSelectedAppointmentTypeId(keysArray[0] || "");
-                    }
+                  value={selectedAppointmentTypeId || null}
+                  onChange={(value) => {
+                    console.log("[Select] onChange:", value);
+                    setSelectedAppointmentTypeId(value?.toString() ?? "");
                   }}
                 >
                   <Label>Appointment Type</Label>
@@ -172,7 +251,10 @@ export default function CreateAppointmentForm({
                   variant="secondary"
                   name="date"
                   value={selectedDate}
-                  onChange={(value) => setSelectedDate(value)}
+                  onChange={(value) => {
+                    console.log("[TextField] date onChange:", value);
+                    setSelectedDate(value);
+                  }}
                 >
                   <Label>Date</Label>
                   <Input
